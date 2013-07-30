@@ -1,0 +1,3 @@
+[submodule "integration-tests/aerogear-unified-push-server"]
+	path = integration-tests/aerogear-unified-push-server
+	url = https://github.com/aerogear/aerogear-unified-push-server
