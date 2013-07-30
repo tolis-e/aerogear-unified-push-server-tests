@@ -147,7 +147,7 @@ class PushNotificationSenderEndpointSpecification extends Specification {
     @Deployment(testable=true)
     def static WebArchive "create deployment"() {
 
-        def unifiedPushServerPom = System.getProperty("unified.push.server.location", "../aerogear-unified-push-server/pom.xml")
+        def unifiedPushServerPom = System.getProperty("unified.push.server.location", "aerogear-unified-push-server/pom.xml")
 
         WebArchive war = ShrinkWrap.create(MavenImporter.class).loadPomFromFile(unifiedPushServerPom).importBuildOutput()
                 .as(WebArchive.class);
