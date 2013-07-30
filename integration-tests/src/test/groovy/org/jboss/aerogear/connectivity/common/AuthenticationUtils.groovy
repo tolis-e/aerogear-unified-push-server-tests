@@ -23,27 +23,59 @@ import org.jboss.aerogear.connectivity.users.Developer
 import com.jayway.restassured.RestAssured
 
 class AuthenticationUtils {
+	
+	def static final String NEWPASSWORD = "aerogear123"
 
-    def login(String loginNameStr, String passwordStr) {
+	def login(String loginNameStr, String passwordStr) {
+		assert root !=null
 
-        assert root !=null
+		// login with default password
+		def json = new JsonBuilder()
+		def response = RestAssured.given()
+				.contentType("application/json")
+				.header("Accept", "application/json")
+				.body( json {
+					loginName loginNameStr
+					password passwordStr
+				})
+				.post("${root}rest/auth/login")
 
-        JsonBuilder json = new JsonBuilder()
-        def response = RestAssured.given()
-                .contentType("application/json")
-                .header("Accept", "application/json")
-                .body( json {
-                    loginName loginNameStr
-                    password passwordStr
-                }).post("${root}rest/auth/login")
+		// we need to change the password
+		if(response.getStatusCode()==205) {
+			def cookies = response.getDetailedCookies()
+			assert cookies !=null
+			response = RestAssured.given()
+					.contentType("application/json")
+					.header("Accept", "application/json")
+					.cookies(cookies)
+					.body( json {
+						loginName loginNameStr
+						password NEWPASSWORD
+					})
+					.put("${root}rest/auth/update")
 
-        return response
-    }
+			assert response.getStatusCode() == 200
+		}
 
-    def createDeveloper(String loginName, String password) {
-        def developer = new Developer()
-        developer.setLoginName(loginName)
-        developer.setPassword(password)
-        return developer
-    }
+		// try to login with new password
+		response = RestAssured.given()
+				.contentType("application/json")
+				.header("Accept", "application/json")
+				.body( json {
+					loginName loginNameStr
+					password NEWPASSWORD
+				})
+				.expect()
+				.statusCode(200)
+				.when().post("${root}rest/auth/login")
+
+		return response
+	}
+
+	def createDeveloper(String loginName, String password) {
+		def developer = new Developer()
+		developer.setLoginName(loginName)
+		developer.setPassword(password)
+		return developer
+	}
 }
