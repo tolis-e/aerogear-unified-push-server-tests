@@ -263,16 +263,10 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <!-- override test compilation phase to run with a different (e.g. Groovy) compiler -->
-                <executions>
-                    <execution>
-                        <id>default-testCompile</id>
-                        <configuration>
-                            <compilerId>groovy-eclipse-compiler</compilerId>
-                        </configuration>
-                    </execution>
-                </executions>
+                <configuration>
+                    <!-- Making this a Groovy based project -->
+                    <compilerId>groovy-eclipse-compiler</compilerId>
+                </configuration>
                 <dependencies>
                     <!-- see https://jira.codehaus.org/browse/GRECLIPSE-1659 -->
                     <!-- https://issues.jboss.org/browse/AGPUSH-147 -->
