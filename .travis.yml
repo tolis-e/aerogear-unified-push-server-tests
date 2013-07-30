@@ -1,0 +1,16 @@
+language: java
+jdk:
+  - openjdk7
+  - oraclejdk7
+  - openjdk6
+  - oraclejdk6
+before_install:
+  - echo "before_install phase begin"
+  - git clone https://github.com/aerogear/aerogear-unified-push-server.git
+  - echo "before_install phase end"
+install:
+  - echo "install phase"
+before_script:
+  - echo "before script"
+script:
+  - mvn -f integration-tests/pom.xml verify
