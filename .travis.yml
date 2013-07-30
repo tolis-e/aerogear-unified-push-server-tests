@@ -11,6 +11,6 @@ before_install:
 install:
   - echo "install phase"
 before_script:
-  - echo "before script"
+  - echo "before_script phase"
 script:
   - mvn -f integration-tests/pom.xml verify
