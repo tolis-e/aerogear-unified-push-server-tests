@@ -16,244 +16,222 @@
  */
 package org.jboss.aerogear.connectivity.androidpush
 
-import java.io.File;
-import java.util.concurrent.Callable
-
 import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AndroidVariantUtils
 import org.jboss.aerogear.connectivity.common.AuthenticationUtils
-import org.jboss.aerogear.connectivity.common.Deployments;
+import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.aerogear.connectivity.common.InstallationUtils
 import org.jboss.aerogear.connectivity.common.PushApplicationUtils
-import org.jboss.aerogear.connectivity.common.PushNotificationSenderUtils
-import org.jboss.aerogear.connectivity.common.SimplePushVariantUtils
-import org.jboss.aerogear.connectivity.common.iOSVariantUtils
 import org.jboss.aerogear.connectivity.model.AndroidVariant
 import org.jboss.aerogear.connectivity.model.InstallationImpl
 import org.jboss.aerogear.connectivity.model.PushApplication
-import org.jboss.aerogear.connectivity.model.SimplePushVariant
-import org.jboss.aerogear.connectivity.rest.util.iOSApplicationUploadForm
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.container.test.api.RunAsClient
 import org.jboss.arquillian.spock.ArquillianSpecification
-import org.jboss.shrinkwrap.api.ShrinkWrap
-import org.jboss.shrinkwrap.api.spec.JavaArchive
 import org.jboss.shrinkwrap.api.spec.WebArchive
-import org.jboss.shrinkwrap.resolver.api.maven.Maven
-import org.jboss.shrinkwrap.resolver.api.maven.archive.importer.MavenImporter
 
 import spock.lang.Shared
 import spock.lang.Specification
 
-import com.google.android.gcm.server.Sender
-import com.jayway.awaitility.Awaitility
-import com.jayway.awaitility.Duration
-import com.notnoop.apns.APNS
-import com.notnoop.apns.ApnsService
-import com.notnoop.apns.ApnsServiceBuilder
-import com.notnoop.apns.PayloadBuilder
-import com.notnoop.apns.internal.ApnsServiceImpl
-import com.notnoop.exceptions.NetworkIOException
-
 
 @ArquillianSpecification
 @Mixin([AuthenticationUtils, PushApplicationUtils, AndroidVariantUtils,
-	InstallationUtils, PushNotificationSenderUtils])
+    InstallationUtils])
 class AndroidRegistrationSpecification extends Specification {
 
-	private final static String ANDROID_VARIANT_GOOGLE_KEY = "IDDASDASDSAQ__1"
+    private final static String ANDROID_VARIANT_GOOGLE_KEY = "IDDASDASDSAQ__1"
 
-	private final static String ANDROID_VARIANT_NAME = "AndroidVariant__1"
+    private final static String ANDROID_VARIANT_NAME = "AndroidVariant__1"
 
-	private final static String ANDROID_VARIANT_DESC = "awesome variant__1"
+    private final static String ANDROID_VARIANT_DESC = "awesome variant__1"
 
-	private final static String AUTHORIZED_LOGIN_NAME = "admin"
+    private final static String AUTHORIZED_LOGIN_NAME = "admin"
 
-	private final static String AUTHORIZED_PASSWORD = "123"
+    private final static String AUTHORIZED_PASSWORD = "123"
 
-	private final static String PUSH_APPLICATION_NAME = "TestPushApplication__1"
+    private final static String PUSH_APPLICATION_NAME = "TestPushApplication__1"
 
-	private final static String PUSH_APPLICATION_DESC = "awesome app__1"
+    private final static String PUSH_APPLICATION_DESC = "awesome app__1"
 
-	private final static String ANDROID_DEVICE_TOKEN = "gsmToken__1"
+    private final static String ANDROID_DEVICE_TOKEN = "gsmToken__1"
 
-	private final static String ANDROID_DEVICE_TOKEN_2 = "gsmToken__2"
+    private final static String ANDROID_DEVICE_TOKEN_2 = "gsmToken__2"
 
-	private final static String ANDROID_DEVICE_TOKEN_3 = "gsmToken__3"
+    private final static String ANDROID_DEVICE_TOKEN_3 = "gsmToken__3"
 
-	private final static String ANDROID_DEVICE_OS = "ANDROID"
+    private final static String ANDROID_DEVICE_OS = "ANDROID"
 
-	private final static String ANDROID_DEVICE_TYPE = "AndroidTablet"
+    private final static String ANDROID_DEVICE_TYPE = "AndroidTablet"
 
-	private final static String ANDROID_DEVICE_TYPE_2 = "AndroidPhone"
+    private final static String ANDROID_DEVICE_TYPE_2 = "AndroidPhone"
 
-	private final static String ANDROID_DEVICE_OS_VERSION = "4.2.2"
+    private final static String ANDROID_DEVICE_OS_VERSION = "4.2.2"
 
-	private final static String ANDROID_CLIENT_ALIAS = "qa_android_1@aerogear"
+    private final static String ANDROID_CLIENT_ALIAS = "qa_android_1@aerogear"
 
-	private final static String ANDROID_CLIENT_ALIAS_2 = "qa_android_2@mobileteam"
+    private final static String ANDROID_CLIENT_ALIAS_2 = "qa_android_2@mobileteam"
 
-	private final static String NOTIFICATION_ALERT_MSG = "Hello AeroGearers"
+    private final static String NOTIFICATION_ALERT_MSG = "Hello AeroGearers"
 
-	private final static String COMMON_IOS_ANDROID_CLIENT_ALIAS = "qa_ios_android@aerogear"
+    private final static String COMMON_IOS_ANDROID_CLIENT_ALIAS = "qa_ios_android@aerogear"
 
-	private final static URL root = new URL("http://localhost:8080/ag-push/")
+    private final static URL root = new URL("http://localhost:8080/ag-push/")
 
-	@Deployment(testable=false)
-	def static WebArchive "create deployment"() {
-		Deployments.unifiedPushServer()
-	}
+    @Deployment(testable=false)
+    def static WebArchive "create deployment"() {
+        Deployments.unifiedPushServer()
+    }
 
-	@Shared def static authCookies
+    @Shared def static authCookies
 
-	@Shared def static pushApplicationId
+    @Shared def static pushApplicationId
 
-	@Shared def static masterSecret
+    @Shared def static masterSecret
 
-	@Shared def static androidVariantId
+    @Shared def static androidVariantId
 
-	@Shared def static androidSecret
-	
-	@RunAsClient
-	def "Authenticate"() {
-		when:
-		authCookies = login(AUTHORIZED_LOGIN_NAME, AUTHORIZED_PASSWORD).getCookies()
+    @Shared def static androidSecret
 
-		then:
-		authCookies != null
-	}
+    @RunAsClient
+    def "Authenticate"() {
+        when:
+        authCookies = login(AUTHORIZED_LOGIN_NAME, AUTHORIZED_PASSWORD).getCookies()
 
-	@RunAsClient
-	def "Register a Push Application"() {
-		given: "A Push Application"
-		PushApplication pushApp = createPushApplication(PUSH_APPLICATION_NAME, PUSH_APPLICATION_DESC,
-				null, null, null)
+        then:
+        authCookies != null
+    }
 
-		when: "Application is registered"
-		def response = registerPushApplication(pushApp, authCookies, null)
-		def body = response.body().jsonPath()
-		pushApplicationId = body.get("pushApplicationID")
-		masterSecret = body.get("masterSecret")
+    @RunAsClient
+    def "Register a Push Application"() {
+        given: "A Push Application"
+        PushApplication pushApp = createPushApplication(PUSH_APPLICATION_NAME, PUSH_APPLICATION_DESC,
+                null, null, null)
 
-		then: "Response code 201 is returned"
-		response.statusCode() == Status.CREATED.getStatusCode()
+        when: "Application is registered"
+        def response = registerPushApplication(pushApp, authCookies, null)
+        def body = response.body().jsonPath()
+        pushApplicationId = body.get("pushApplicationID")
+        masterSecret = body.get("masterSecret")
 
-		and: "Push App Id is not null"
-		pushApplicationId != null
+        then: "Response code 201 is returned"
+        response.statusCode() == Status.CREATED.getStatusCode()
 
-		and: "Master secret is not null"
-		masterSecret != null
+        and: "Push App Id is not null"
+        pushApplicationId != null
 
-		and: "Push App Name is the expected one"
-		body.get("name") == PUSH_APPLICATION_NAME
-	}
+        and: "Master secret is not null"
+        masterSecret != null
 
-	@RunAsClient
-	def "Register an Android Variant"() {
-		given: "An Android Variant"
-		AndroidVariant variant = createAndroidVariant(ANDROID_VARIANT_NAME, ANDROID_VARIANT_DESC,
-				null, null, null, ANDROID_VARIANT_GOOGLE_KEY)
+        and: "Push App Name is the expected one"
+        body.get("name") == PUSH_APPLICATION_NAME
+    }
 
-		when: "Android Variant is registered"
-		def response = registerAndroidVariant(pushApplicationId, variant, authCookies)
-		def body = response.body().jsonPath()
-		androidVariantId = body.get("variantID")
-		androidSecret = body.get("secret")
+    @RunAsClient
+    def "Register an Android Variant"() {
+        given: "An Android Variant"
+        AndroidVariant variant = createAndroidVariant(ANDROID_VARIANT_NAME, ANDROID_VARIANT_DESC,
+                null, null, null, ANDROID_VARIANT_GOOGLE_KEY)
 
-		then: "Push Application id is not empty"
-		pushApplicationId != null
+        when: "Android Variant is registered"
+        def response = registerAndroidVariant(pushApplicationId, variant, authCookies)
+        def body = response.body().jsonPath()
+        androidVariantId = body.get("variantID")
+        androidSecret = body.get("secret")
 
-		and: "Response status code is 201"
-		response != null && response.statusCode() == Status.CREATED.getStatusCode()
+        then: "Push Application id is not empty"
+        pushApplicationId != null
 
-		and: "Android Variant id is not null"
-		androidVariantId != null
+        and: "Response status code is 201"
+        response != null && response.statusCode() == Status.CREATED.getStatusCode()
 
-		and: "Secret is not empty"
-		androidSecret != null
-	}
+        and: "Android Variant id is not null"
+        androidVariantId != null
 
-	@RunAsClient
-	def "Register an Android Variant - Bad Case - Missing Google key"() {
-		given: "An Android Variant"
-		AndroidVariant variant = createAndroidVariant(ANDROID_VARIANT_NAME, ANDROID_VARIANT_DESC,
-				null, null, null, null)
+        and: "Secret is not empty"
+        androidSecret != null
+    }
 
-		when: "Android Variant is registered"
-		def response = registerAndroidVariant(pushApplicationId, variant, authCookies)
+    @RunAsClient
+    def "Register an Android Variant - Bad Case - Missing Google key"() {
+        given: "An Android Variant"
+        AndroidVariant variant = createAndroidVariant(ANDROID_VARIANT_NAME, ANDROID_VARIANT_DESC,
+                null, null, null, null)
 
-		then: "Push Application id is not empty"
-		pushApplicationId != null
+        when: "Android Variant is registered"
+        def response = registerAndroidVariant(pushApplicationId, variant, authCookies)
 
-		and: "Response status code is 400"
-		response != null && response.statusCode() == Status.BAD_REQUEST.getStatusCode()
-	}
+        then: "Push Application id is not empty"
+        pushApplicationId != null
 
-	@RunAsClient
-	def "Register an Android Variant - Bad Case - Missing auth cookies"() {
-		given: "An Android Variant"
-		AndroidVariant variant = createAndroidVariant(ANDROID_VARIANT_NAME, ANDROID_VARIANT_DESC,
-				null, null, null, ANDROID_VARIANT_GOOGLE_KEY)
+        and: "Response status code is 400"
+        response != null && response.statusCode() == Status.BAD_REQUEST.getStatusCode()
+    }
 
-		when: "Android Variant is registered"
-		def response = registerAndroidVariant(pushApplicationId, variant, new HashMap<String, ?>())
+    @RunAsClient
+    def "Register an Android Variant - Bad Case - Missing auth cookies"() {
+        given: "An Android Variant"
+        AndroidVariant variant = createAndroidVariant(ANDROID_VARIANT_NAME, ANDROID_VARIANT_DESC,
+                null, null, null, ANDROID_VARIANT_GOOGLE_KEY)
 
-		then: "Push Application id is not empty"
-		pushApplicationId != null
+        when: "Android Variant is registered"
+        def response = registerAndroidVariant(pushApplicationId, variant, new HashMap<String, ?>())
 
-		and: "Response status code is 401"
-		response != null && response.statusCode() == Status.UNAUTHORIZED.getStatusCode()
-	}
-	
-	@RunAsClient
-	def "Register an installation for an Android device"() {
+        then: "Push Application id is not empty"
+        pushApplicationId != null
 
-		given: "An installation for an Android device"
-		InstallationImpl androidInstallation = createInstallation(ANDROID_DEVICE_TOKEN, ANDROID_DEVICE_TYPE,
-				ANDROID_DEVICE_OS, ANDROID_DEVICE_OS_VERSION, ANDROID_CLIENT_ALIAS, null)
+        and: "Response status code is 401"
+        response != null && response.statusCode() == Status.UNAUTHORIZED.getStatusCode()
+    }
 
-		when: "Installation is registered"
-		def response = registerInstallation(androidVariantId, androidSecret, androidInstallation)
+    @RunAsClient
+    def "Register an installation for an Android device"() {
 
-		then: "Variant id and secret is not empty"
-		androidVariantId != null && androidSecret != null
+        given: "An installation for an Android device"
+        InstallationImpl androidInstallation = createInstallation(ANDROID_DEVICE_TOKEN, ANDROID_DEVICE_TYPE,
+                ANDROID_DEVICE_OS, ANDROID_DEVICE_OS_VERSION, ANDROID_CLIENT_ALIAS, null)
 
-		and: "Response status code is 200"
-		response != null && response.statusCode() == Status.OK.getStatusCode()
-	}
+        when: "Installation is registered"
+        def response = registerInstallation(androidVariantId, androidSecret, androidInstallation)
 
-	@RunAsClient
-	def "Register a second installation for an Android device"() {
+        then: "Variant id and secret is not empty"
+        androidVariantId != null && androidSecret != null
 
-		given: "An installation for an Android device"
-		InstallationImpl androidInstallation = createInstallation(ANDROID_DEVICE_TOKEN_2, ANDROID_DEVICE_TYPE_2,
-				ANDROID_DEVICE_OS, ANDROID_DEVICE_OS_VERSION, ANDROID_CLIENT_ALIAS_2, null)
+        and: "Response status code is 200"
+        response != null && response.statusCode() == Status.OK.getStatusCode()
+    }
 
-		when: "Installation is registered"
-		def response = registerInstallation(androidVariantId, androidSecret, androidInstallation)
+    @RunAsClient
+    def "Register a second installation for an Android device"() {
 
-		then: "Variant id and secret is not empty"
-		androidVariantId != null && androidSecret != null
+        given: "An installation for an Android device"
+        InstallationImpl androidInstallation = createInstallation(ANDROID_DEVICE_TOKEN_2, ANDROID_DEVICE_TYPE_2,
+                ANDROID_DEVICE_OS, ANDROID_DEVICE_OS_VERSION, ANDROID_CLIENT_ALIAS_2, null)
 
-		and: "Response status code is 200"
-		response != null && response.statusCode() == Status.OK.getStatusCode()
-	}
+        when: "Installation is registered"
+        def response = registerInstallation(androidVariantId, androidSecret, androidInstallation)
 
-	@RunAsClient
-	def "Register a third installation for an Android device"() {
+        then: "Variant id and secret is not empty"
+        androidVariantId != null && androidSecret != null
 
-		given: "An installation for an Android device"
-		InstallationImpl androidInstallation = createInstallation(ANDROID_DEVICE_TOKEN_3, ANDROID_DEVICE_TYPE,
-				ANDROID_DEVICE_OS, ANDROID_DEVICE_OS_VERSION, COMMON_IOS_ANDROID_CLIENT_ALIAS, null)
+        and: "Response status code is 200"
+        response != null && response.statusCode() == Status.OK.getStatusCode()
+    }
 
-		when: "Installation is registered"
-		def response = registerInstallation(androidVariantId, androidSecret, androidInstallation)
+    @RunAsClient
+    def "Register a third installation for an Android device"() {
 
-		then: "Variant id and secret is not empty"
-		androidVariantId != null && androidSecret != null
+        given: "An installation for an Android device"
+        InstallationImpl androidInstallation = createInstallation(ANDROID_DEVICE_TOKEN_3, ANDROID_DEVICE_TYPE,
+                ANDROID_DEVICE_OS, ANDROID_DEVICE_OS_VERSION, COMMON_IOS_ANDROID_CLIENT_ALIAS, null)
 
-		and: "Response status code is 200"
-		response != null && response.statusCode() == Status.OK.getStatusCode()
-	}
+        when: "Installation is registered"
+        def response = registerInstallation(androidVariantId, androidSecret, androidInstallation)
+
+        then: "Variant id and secret is not empty"
+        androidVariantId != null && androidSecret != null
+
+        and: "Response status code is 200"
+        response != null && response.statusCode() == Status.OK.getStatusCode()
+    }
 }

@@ -16,12 +16,30 @@
  */
 package org.jboss.aerogear.connectivity.common
 
-import java.io.File;
-
 import org.jboss.shrinkwrap.api.ShrinkWrap
+import org.jboss.shrinkwrap.api.spec.JavaArchive
 import org.jboss.shrinkwrap.api.spec.WebArchive
 import org.jboss.shrinkwrap.resolver.api.maven.Maven
 import org.jboss.shrinkwrap.resolver.api.maven.archive.importer.MavenImporter
+
+import org.jboss.aerogear.connectivity.common.AndroidVariantUtils
+import org.jboss.aerogear.connectivity.common.AuthenticationUtils
+import org.jboss.aerogear.connectivity.common.InstallationUtils
+import org.jboss.aerogear.connectivity.common.PushApplicationUtils
+import org.jboss.aerogear.connectivity.common.PushNotificationSenderUtils
+import org.jboss.aerogear.connectivity.common.SimplePushVariantUtils
+import org.jboss.aerogear.connectivity.common.iOSVariantUtils
+
+import com.google.android.gcm.server.Message
+import com.google.android.gcm.server.MulticastResult
+import com.google.android.gcm.server.Result
+import com.google.android.gcm.server.Sender
+import com.notnoop.apns.APNS
+import com.notnoop.apns.ApnsService
+import com.notnoop.apns.ApnsServiceBuilder
+import com.notnoop.apns.PayloadBuilder
+import com.notnoop.apns.internal.ApnsServiceImpl
+import com.notnoop.exceptions.NetworkIOException
 
 class Deployments {
 
@@ -56,6 +74,61 @@ class Deployments {
 
         File[] libs = Maven.resolver().loadPomFromFile("pom.xml").resolve(
                 "org.mockito:mockito-core").withTransitivity().asFile()
+        war = war.addAsLibraries(libs)
+
+        return war
+    }
+    
+    def static WebArchive customUnifiedPushServerWithClasses(Class... clazz) {
+        def unifiedPushServerPom = System.getProperty("unified.push.server.location", "aerogear-unified-push-server/pom.xml")
+        
+        WebArchive war = ShrinkWrap.create(MavenImporter.class).loadPomFromFile(unifiedPushServerPom).importBuildOutput()
+                .as(WebArchive.class);
+
+        war.delete("/WEB-INF/lib/gcm-server-1.0.2.jar")
+
+        war.delete("/WEB-INF/classes/META-INF/persistence.xml")
+        war.addAsResource("META-INF/persistence.xml", "META-INF/persistence.xml")
+
+        war.addClasses(
+                    AuthenticationUtils.class,
+                    PushApplicationUtils.class,
+                    AndroidVariantUtils.class,
+                    SimplePushVariantUtils.class,
+                    InstallationUtils.class,
+                    iOSVariantUtils.class,
+                    PushNotificationSenderUtils.class
+                )
+
+        war.addClasses(clazz)
+        
+        JavaArchive jar = ShrinkWrap.create(JavaArchive.class, "gcm-server-1.0.2.jar")
+                .addClasses(
+                    Result.class,
+                    Message.class,
+                    MulticastResult.class,
+                    Message.class,
+                    Sender.class
+                )
+        war.addAsLibraries(jar)
+
+        war.delete("/WEB-INF/lib/apns-0.2.3.jar")
+
+        JavaArchive apnsJar = ShrinkWrap.create(JavaArchive.class, "apns-0.2.3.jar")
+                .addClasses(
+                    NetworkIOException.class,
+                    ApnsService.class,
+                    ApnsServiceImpl.class,
+                    ApnsServiceBuilder.class,
+                    PayloadBuilder.class,
+                    APNS.class
+                )
+        war.addAsLibraries(apnsJar)
+
+        File[] libs = Maven.resolver().loadPomFromFile("pom.xml").resolve(
+                "com.jayway.restassured:rest-assured",
+                "org.mockito:mockito-core",
+                "com.jayway.awaitility:awaitility-groovy").withTransitivity().asFile()
         war = war.addAsLibraries(libs)
 
         return war
