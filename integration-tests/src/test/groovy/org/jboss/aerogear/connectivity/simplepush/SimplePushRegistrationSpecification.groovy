@@ -16,28 +16,21 @@
  */
 package org.jboss.aerogear.connectivity.simplepush
 
-import java.io.File;
-import java.util.concurrent.Callable
-
 import javax.ws.rs.core.Response.Status
 
-import org.jboss.aerogear.connectivity.common.AndroidVariantUtils
 import org.jboss.aerogear.connectivity.common.AuthenticationUtils
+import org.jboss.aerogear.connectivity.common.Deployments;
 import org.jboss.aerogear.connectivity.common.InstallationUtils
 import org.jboss.aerogear.connectivity.common.PushApplicationUtils
 import org.jboss.aerogear.connectivity.common.PushNotificationSenderUtils
 import org.jboss.aerogear.connectivity.common.SimplePushVariantUtils
-import org.jboss.aerogear.connectivity.common.iOSVariantUtils
-import org.jboss.aerogear.connectivity.model.AndroidVariant
 import org.jboss.aerogear.connectivity.model.InstallationImpl
 import org.jboss.aerogear.connectivity.model.PushApplication
 import org.jboss.aerogear.connectivity.model.SimplePushVariant
-import org.jboss.aerogear.connectivity.rest.util.iOSApplicationUploadForm
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.container.test.api.RunAsClient
 import org.jboss.arquillian.spock.ArquillianSpecification
 import org.jboss.shrinkwrap.api.ShrinkWrap
-import org.jboss.shrinkwrap.api.spec.JavaArchive
 import org.jboss.shrinkwrap.api.spec.WebArchive
 import org.jboss.shrinkwrap.resolver.api.maven.Maven
 import org.jboss.shrinkwrap.resolver.api.maven.archive.importer.MavenImporter
@@ -45,197 +38,162 @@ import org.jboss.shrinkwrap.resolver.api.maven.archive.importer.MavenImporter
 import spock.lang.Shared
 import spock.lang.Specification
 
-import com.google.android.gcm.server.Sender
-import com.jayway.awaitility.Awaitility
-import com.jayway.awaitility.Duration
-import com.notnoop.apns.APNS
-import com.notnoop.apns.ApnsService
-import com.notnoop.apns.ApnsServiceBuilder
-import com.notnoop.apns.PayloadBuilder
-import com.notnoop.apns.internal.ApnsServiceImpl
-import com.notnoop.exceptions.NetworkIOException
-
 
 @ArquillianSpecification
-@Mixin([AuthenticationUtils, PushApplicationUtils, SimplePushVariantUtils, 
-	InstallationUtils, PushNotificationSenderUtils])
+@Mixin([AuthenticationUtils, PushApplicationUtils, SimplePushVariantUtils,
+    InstallationUtils, PushNotificationSenderUtils])
 class SimplePushRegistrationSpecification extends Specification {
 
-	private final static String AUTHORIZED_LOGIN_NAME = "admin"
+    private final static String AUTHORIZED_LOGIN_NAME = "admin"
 
-	private final static String AUTHORIZED_PASSWORD = "123"
+    private final static String AUTHORIZED_PASSWORD = "123"
 
-	private final static String PUSH_APPLICATION_NAME = "TestPushApplication__1"
+    private final static String PUSH_APPLICATION_NAME = "TestPushApplication__1"
 
-	private final static String PUSH_APPLICATION_DESC = "awesome app__1"
+    private final static String PUSH_APPLICATION_DESC = "awesome app__1"
 
-	private final static String SIMPLE_PUSH_VARIANT_NAME = "SimplePushVariant__1"
+    private final static String SIMPLE_PUSH_VARIANT_NAME = "SimplePushVariant__1"
 
-	private final static String SIMPLE_PUSH_VARIANT_DESC = "awesome variant__1"
+    private final static String SIMPLE_PUSH_VARIANT_DESC = "awesome variant__1"
 
-	private final static String SIMPLE_PUSH_VARIANT_NETWORK_URL = "http://localhost:8081/endpoint/"
+    private final static String SIMPLE_PUSH_VARIANT_NETWORK_URL = "http://localhost:8081/endpoint/"
 
-	private final static String SIMPLE_PUSH_DEVICE_TOKEN = "simplePushToken__1"
+    private final static String SIMPLE_PUSH_DEVICE_TOKEN = "simplePushToken__1"
 
-	private final static String SIMPLE_PUSH_DEVICE_TYPE = "web"
+    private final static String SIMPLE_PUSH_DEVICE_TYPE = "web"
 
-	private final static String SIMPLE_PUSH_DEVICE_OS = "MozillaOS"
+    private final static String SIMPLE_PUSH_DEVICE_OS = "MozillaOS"
 
-	private final static String SIMPLE_PUSH_CATEGORY = "1234"
+    private final static String SIMPLE_PUSH_CATEGORY = "1234"
 
-	private final static String SIMPLE_PUSH_CLIENT_ALIAS = "qa_simple_push_1@aerogear"
+    private final static String SIMPLE_PUSH_CLIENT_ALIAS = "qa_simple_push_1@aerogear"
 
-	private final static String SIMPLE_PUSH_VERSION = "version=15"
+    private final static String SIMPLE_PUSH_VERSION = "version=15"
 
-	private final static URL root = new URL("http://localhost:8080/ag-push/")
+    private final static URL root = new URL("http://localhost:8080/ag-push/")
 
-	@Deployment(testable=true)
-	def static WebArchive "create deployment"() {
+    @Deployment(testable=true)
+    def static WebArchive "create deployment"() {
+        Deployments.customUnifiedPushServerWithClasses(SimplePushRegistrationSpecification.class)
+    }
 
-		def unifiedPushServerPom = System.getProperty("unified.push.server.location", "aerogear-unified-push-server/pom.xml")
+    @Shared def static authCookies
 
-		WebArchive war = ShrinkWrap.create(MavenImporter.class).loadPomFromFile(unifiedPushServerPom).importBuildOutput()
-				.as(WebArchive.class);
+    @Shared def static pushApplicationId
 
-		war.delete("/WEB-INF/classes/META-INF/persistence.xml")
-		war.addAsResource("META-INF/persistence.xml", "META-INF/persistence.xml")
+    @Shared def static masterSecret
 
-		war.addClasses(
-					AuthenticationUtils.class,
-					PushApplicationUtils.class,
-					SimplePushVariantUtils.class,
-					InstallationUtils.class,
-					PushNotificationSenderUtils.class,
-					SimplePushRegistrationSpecification.class
-				)
+    @Shared def static simplePushVariantId
 
-		File[] libs = Maven.resolver().loadPomFromFile("pom.xml").resolve(
-				"com.jayway.restassured:rest-assured",
-				"org.mockito:mockito-core",
-				"com.jayway.awaitility:awaitility-groovy").withTransitivity().asFile()
-		war = war.addAsLibraries(libs)
+    @Shared def static simplePushSecret
 
-		return war
-	}
+    @RunAsClient
+    def "Authenticate"() {
+        when:
+        authCookies = login(AUTHORIZED_LOGIN_NAME, AUTHORIZED_PASSWORD).getCookies()
 
-	@Shared def static authCookies
+        then:
+        authCookies != null
+    }
 
-	@Shared def static pushApplicationId
+    @RunAsClient
+    def "Register a Push Application"() {
+        given: "A Push Application"
+        PushApplication pushApp = createPushApplication(PUSH_APPLICATION_NAME, PUSH_APPLICATION_DESC,
+                null, null, null)
 
-	@Shared def static masterSecret
+        when: "Application is registered"
+        def response = registerPushApplication(pushApp, authCookies, null)
+        def body = response.body().jsonPath()
+        pushApplicationId = body.get("pushApplicationID")
+        masterSecret = body.get("masterSecret")
 
-	@Shared def static simplePushVariantId
+        then: "Response code 201 is returned"
+        response.statusCode() == Status.CREATED.getStatusCode()
 
-	@Shared def static simplePushSecret
+        and: "Push App Id is not null"
+        pushApplicationId != null
 
-	@RunAsClient
-	def "Authenticate"() {
-		when:
-		authCookies = login(AUTHORIZED_LOGIN_NAME, AUTHORIZED_PASSWORD).getCookies()
+        and: "Master secret is not null"
+        masterSecret != null
 
-		then:
-		authCookies != null
-	}
-
-	@RunAsClient
-	def "Register a Push Application"() {
-		given: "A Push Application"
-		PushApplication pushApp = createPushApplication(PUSH_APPLICATION_NAME, PUSH_APPLICATION_DESC,
-				null, null, null)
-
-		when: "Application is registered"
-		def response = registerPushApplication(pushApp, authCookies, null)
-		def body = response.body().jsonPath()
-		pushApplicationId = body.get("pushApplicationID")
-		masterSecret = body.get("masterSecret")
-
-		then: "Response code 201 is returned"
-		response.statusCode() == Status.CREATED.getStatusCode()
-
-		and: "Push App Id is not null"
-		pushApplicationId != null
-
-		and: "Master secret is not null"
-		masterSecret != null
-
-		and: "Push App Name is the expected one"
-		body.get("name") == PUSH_APPLICATION_NAME
-	}
+        and: "Push App Name is the expected one"
+        body.get("name") == PUSH_APPLICATION_NAME
+    }
 
 
-	@RunAsClient
-	def "Register a Simple Push Variant"() {
-		given: "A SimplePush Variant"
-		SimplePushVariant variant = createSimplePushVariant(SIMPLE_PUSH_VARIANT_NAME, SIMPLE_PUSH_VARIANT_DESC,
-				null, null, null, SIMPLE_PUSH_VARIANT_NETWORK_URL)
+    @RunAsClient
+    def "Register a Simple Push Variant"() {
+        given: "A SimplePush Variant"
+        SimplePushVariant variant = createSimplePushVariant(SIMPLE_PUSH_VARIANT_NAME, SIMPLE_PUSH_VARIANT_DESC,
+                null, null, null, SIMPLE_PUSH_VARIANT_NETWORK_URL)
 
-		when: "Simple Push Variant is registered"
-		def response = registerSimplePushVariant(pushApplicationId, variant, authCookies)
-		def body = response.body().jsonPath()
-		simplePushVariantId = body.get("variantID")
-		simplePushSecret = body.get("secret")
+        when: "Simple Push Variant is registered"
+        def response = registerSimplePushVariant(pushApplicationId, variant, authCookies)
+        def body = response.body().jsonPath()
+        simplePushVariantId = body.get("variantID")
+        simplePushSecret = body.get("secret")
 
-		then: "Push Application id is not empty"
-		pushApplicationId != null
+        then: "Push Application id is not empty"
+        pushApplicationId != null
 
-		and: "Response status code is 201"
-		response != null && response.statusCode() == Status.CREATED.getStatusCode()
+        and: "Response status code is 201"
+        response != null && response.statusCode() == Status.CREATED.getStatusCode()
 
-		and: "Simple Push Variant id is not null"
-		simplePushVariantId != null
+        and: "Simple Push Variant id is not null"
+        simplePushVariantId != null
 
-		and: "Secret is not empty"
-		simplePushSecret != null
-	}
+        and: "Secret is not empty"
+        simplePushSecret != null
+    }
 
-	@RunAsClient
-	def "Register a Simple Push Variant - Bad Case - Missing auth cookies"() {
-		given: "A SimplePush Variant"
-		SimplePushVariant variant = createSimplePushVariant(SIMPLE_PUSH_VARIANT_NAME, SIMPLE_PUSH_VARIANT_DESC,
-				null, null, null, null)
+    @RunAsClient
+    def "Register a Simple Push Variant - Bad Case - Missing auth cookies"() {
+        given: "A SimplePush Variant"
+        SimplePushVariant variant = createSimplePushVariant(SIMPLE_PUSH_VARIANT_NAME, SIMPLE_PUSH_VARIANT_DESC,
+                null, null, null, null)
 
-		when: "Simple Push Variant is registered"
-		def response = registerSimplePushVariant(pushApplicationId, variant, new HashMap<String, ?>())
+        when: "Simple Push Variant is registered"
+        def response = registerSimplePushVariant(pushApplicationId, variant, new HashMap<String, ?>())
 
-		then: "Push Application id is not empty"
-		pushApplicationId != null
+        then: "Push Application id is not empty"
+        pushApplicationId != null
 
-		and: "Response status code is 401"
-		response != null && response.statusCode() == Status.UNAUTHORIZED.getStatusCode()
-	}
+        and: "Response status code is 401"
+        response != null && response.statusCode() == Status.UNAUTHORIZED.getStatusCode()
+    }
 
-	@RunAsClient
-	def "Register a Simple Push Variant - Bad Case - Missing network url"() {
-		given: "A SimplePush Variant"
-		SimplePushVariant variant = createSimplePushVariant(SIMPLE_PUSH_VARIANT_NAME, SIMPLE_PUSH_VARIANT_DESC,
-				null, null, null, null)
+    @RunAsClient
+    def "Register a Simple Push Variant - Bad Case - Missing network url"() {
+        given: "A SimplePush Variant"
+        SimplePushVariant variant = createSimplePushVariant(SIMPLE_PUSH_VARIANT_NAME, SIMPLE_PUSH_VARIANT_DESC,
+                null, null, null, null)
 
-		when: "Simple Push Variant is registered"
-		def response = registerSimplePushVariant(pushApplicationId, variant, authCookies)
-		def body = response.body().jsonPath()
+        when: "Simple Push Variant is registered"
+        def response = registerSimplePushVariant(pushApplicationId, variant, authCookies)
+        def body = response.body().jsonPath()
 
-		then: "Push Application id is not empty"
-		pushApplicationId != null
+        then: "Push Application id is not empty"
+        pushApplicationId != null
 
-		and: "Response status code is 400"
-		response != null && response.statusCode() == Status.BAD_REQUEST.getStatusCode()
-	}
+        and: "Response status code is 400"
+        response != null && response.statusCode() == Status.BAD_REQUEST.getStatusCode()
+    }
 
-	@RunAsClient
-	def "Register an installation for a Simple Push device"() {
+    @RunAsClient
+    def "Register an installation for a Simple Push device"() {
 
-		given: "An installation for a Simple Push device"
-		InstallationImpl simplePushInstallation = createInstallation(SIMPLE_PUSH_DEVICE_TOKEN, SIMPLE_PUSH_DEVICE_TYPE,
-				SIMPLE_PUSH_DEVICE_OS, "", SIMPLE_PUSH_CLIENT_ALIAS, SIMPLE_PUSH_CATEGORY)
+        given: "An installation for a Simple Push device"
+        InstallationImpl simplePushInstallation = createInstallation(SIMPLE_PUSH_DEVICE_TOKEN, SIMPLE_PUSH_DEVICE_TYPE,
+                SIMPLE_PUSH_DEVICE_OS, "", SIMPLE_PUSH_CLIENT_ALIAS, SIMPLE_PUSH_CATEGORY)
 
-		when: "Installation is registered"
-		def response = registerInstallation(simplePushVariantId, simplePushSecret, simplePushInstallation)
+        when: "Installation is registered"
+        def response = registerInstallation(simplePushVariantId, simplePushSecret, simplePushInstallation)
 
-		then: "Variant id and secret is not empty"
-		simplePushVariantId != null && simplePushSecret != null
+        then: "Variant id and secret is not empty"
+        simplePushVariantId != null && simplePushSecret != null
 
-		and: "Response status code is 200"
-		response != null && response.statusCode() == Status.OK.getStatusCode()
-	}
-
+        and: "Response status code is 200"
+        response != null && response.statusCode() == Status.OK.getStatusCode()
+    }
 }
