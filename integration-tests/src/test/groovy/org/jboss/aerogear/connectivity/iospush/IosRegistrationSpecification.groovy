@@ -16,6 +16,9 @@
  */
 package org.jboss.aerogear.connectivity.iospush
 
+import java.util.List
+
+import javax.inject.Inject
 import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AuthenticationUtils
@@ -26,7 +29,13 @@ import org.jboss.aerogear.connectivity.common.PushNotificationSenderUtils
 import org.jboss.aerogear.connectivity.common.iOSVariantUtils
 import org.jboss.aerogear.connectivity.model.InstallationImpl
 import org.jboss.aerogear.connectivity.model.PushApplication
+import org.jboss.aerogear.connectivity.model.iOSVariant
 import org.jboss.aerogear.connectivity.rest.util.iOSApplicationUploadForm
+import org.jboss.aerogear.connectivity.service.ClientInstallationService
+import org.jboss.aerogear.connectivity.service.PushApplicationService
+// workaround to inject lowercase class
+import org.jboss.aerogear.connectivity.service.iOSVariantService as IOSVariantService
+import org.jboss.aerogear.connectivity.service.impl.iOSVariantServiceImpl
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.container.test.api.RunAsClient
 import org.jboss.arquillian.spock.ArquillianSpecification
@@ -106,6 +115,15 @@ class IosRegistrationSpecification extends Specification {
 
     @Shared def static iOSPushSecret
 
+    @Inject
+    private PushApplicationService pushAppService
+    
+    @Inject
+    private ClientInstallationService clientInstallationService
+    
+    @Inject
+    private IOSVariantService iosVariantService
+    
     @RunAsClient
     def "Authenticate"() {
         when:
@@ -215,5 +233,36 @@ class IosRegistrationSpecification extends Specification {
 
         and: "Response status code is 200"
         response != null && response.statusCode() == Status.OK.getStatusCode()
+    }
+    
+    def "Verify that registrations were done"() {
+        
+        when: "Getting all the Push Applications for the user"
+        def List<PushApplication> pushApps = pushAppService.findAllPushApplicationsForDeveloper(AUTHORIZED_LOGIN_NAME)
+        
+        and: "Getting the iOS variants"
+        def List<iOSVariant> iOSVariants = iosVariantService.findAlliOSVariants()
+        def iOSVariant = iOSVariants != null ? iOSVariants.get(0) : null
+        
+        and: "Getting the registered tokens by variant id"
+        def List<String> deviceTokens = clientInstallationService.findAllDeviceTokenForVariantID(iOSVariant.getVariantID())
+        
+        then: "Injections have been done"
+        pushAppService != null && iosVariantService != null && clientInstallationService != null
+        
+        and: "The previously registered push app is included in the list"
+        pushApps != null && pushApps.size() == 1 && nameExistsInList(PUSH_APPLICATION_NAME, pushApps)
+        
+        and: "An iOS variant exists"
+        iOSVariants != null && iOSVariants.size() == 1 && iOSVariant != null
+        
+        and: "The iOS variant has the expected name"
+        IOS_VARIANT_NAME.equals(iOSVariant.getName())
+        
+        and: "The registered device tokens should not be empty"
+        deviceTokens != null
+        
+        and: "The registered device tokens should contain the 2 registered iOS tokens"
+        deviceTokens.contains(IOS_DEVICE_TOKEN) && deviceTokens.contains(IOS_DEVICE_TOKEN_2)
     }
 }
