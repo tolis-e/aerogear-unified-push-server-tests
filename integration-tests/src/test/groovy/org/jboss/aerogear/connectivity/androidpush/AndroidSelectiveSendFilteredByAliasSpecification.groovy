@@ -18,7 +18,7 @@ package org.jboss.aerogear.connectivity.androidpush
 
 import java.util.concurrent.Callable
 
-import javax.inject.Inject;
+import javax.inject.Inject
 import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AndroidVariantUtils
