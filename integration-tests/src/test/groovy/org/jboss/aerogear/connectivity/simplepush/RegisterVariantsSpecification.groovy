@@ -16,22 +16,19 @@
  */
 package org.jboss.aerogear.connectivity.simplepush
 
-import java.net.URL;
-
-
-import com.jayway.restassured.RestAssured
 import groovy.json.JsonBuilder
 
+import org.jboss.aerogear.connectivity.common.AdminLogin
+import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.arquillian.container.test.api.Deployment
+import org.jboss.arquillian.spock.ArquillianSpecification
 import org.jboss.arquillian.test.api.ArquillianResource
 import org.jboss.shrinkwrap.api.spec.WebArchive
-import spock.lang.Specification
 
 import spock.lang.Shared
+import spock.lang.Specification
 
-import org.jboss.arquillian.spock.ArquillianSpecification
-import org.jboss.aerogear.connectivity.common.AdminLogin;
-import org.jboss.aerogear.connectivity.common.Deployments;
+import com.jayway.restassured.RestAssured
 
 @ArquillianSpecification
 @Mixin(AdminLogin)
@@ -51,6 +48,7 @@ class RegisterVariantsSpecification extends Specification {
 
     def setup() {
         authCookies = authCookies ? authCookies : login()
+        //RestAssured.filters(new RequestLoggingFilter(System.err), new ResponseLoggingFilter(System.err))
     }
 
     // curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"name" : "ddd", "description" :  "ddd" }' http://localhost:8080/ag-push/rest/
@@ -127,8 +125,9 @@ class RegisterVariantsSpecification extends Specification {
                 .header("Accept", "application/json")
                 .cookies(authCookies)
                 // TODO this might be needed to be replaced with real stuff on command line
-                .multiPart("certificate", new File("src/itest/resources/certs/qaAerogear.p12"))
+                .multiPart("certificate", new File("src/test/resources/certs/qaAerogear.p12"))
                 .multiPart("passphrase", "aerogear")
+                .multiPart("production", "false")
 
         when: "iOS Mobile variant is registered"
         def response = RestAssured.given().spec(request).post("${root}rest/applications/${pushAppId}/iOS")
