@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AndroidVariantUtils
 import org.jboss.aerogear.connectivity.common.AuthenticationUtils
-import org.jboss.aerogear.connectivity.common.Deployments;
+import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.aerogear.connectivity.common.InstallationUtils
 import org.jboss.aerogear.connectivity.common.PushApplicationUtils
 import org.jboss.aerogear.connectivity.common.PushNotificationSenderUtils
@@ -36,24 +36,13 @@ import org.jboss.aerogear.connectivity.rest.util.iOSApplicationUploadForm
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.container.test.api.RunAsClient
 import org.jboss.arquillian.spock.ArquillianSpecification
-import org.jboss.shrinkwrap.api.ShrinkWrap
-import org.jboss.shrinkwrap.api.spec.JavaArchive
 import org.jboss.shrinkwrap.api.spec.WebArchive
-import org.jboss.shrinkwrap.resolver.api.maven.Maven
-import org.jboss.shrinkwrap.resolver.api.maven.archive.importer.MavenImporter
 
 import spock.lang.Shared
 import spock.lang.Specification
 
-import com.google.android.gcm.server.Sender
 import com.jayway.awaitility.Awaitility
 import com.jayway.awaitility.Duration
-import com.notnoop.apns.APNS
-import com.notnoop.apns.ApnsService
-import com.notnoop.apns.ApnsServiceBuilder
-import com.notnoop.apns.PayloadBuilder
-import com.notnoop.apns.internal.ApnsServiceImpl
-import com.notnoop.exceptions.NetworkIOException
 
 
 @ArquillianSpecification

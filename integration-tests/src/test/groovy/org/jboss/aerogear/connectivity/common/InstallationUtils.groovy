@@ -25,11 +25,11 @@ import com.jayway.restassured.RestAssured
 class InstallationUtils {
 
     def createInstallation(String deviceToken, String deviceType,
-            String mobileOperatingSystem, String osVersion, String alias, String category) {
+            String OperatingSystem, String osVersion, String alias, String category) {
         InstallationImpl installation = new InstallationImpl()
         installation.setDeviceToken(deviceToken);
         installation.setDeviceType(deviceType)
-        installation.setMobileOperatingSystem(mobileOperatingSystem)
+        installation.setOperatingSystem(OperatingSystem)
         installation.setOsVersion(osVersion)
         installation.setAlias(alias)
         installation.setCategory(category)
@@ -37,9 +37,9 @@ class InstallationUtils {
     }
 
     def registerInstallation(String variantID, String secret, InstallationImpl installation) {
-        
+
         assert root !=null
-        
+
         JsonBuilder json = new JsonBuilder()
         def response = RestAssured.given()
                 .contentType("application/json")
@@ -48,7 +48,7 @@ class InstallationUtils {
                 .body( json {
                     deviceToken installation.getDeviceToken()
                     deviceType installation.getDeviceType()
-                    mobileOperatingSystem installation.getMobileOperatingSystem()
+                    operatingSystem installation.getOperatingSystem()
                     osVersion installation.getOsVersion()
                     alias installation.getAlias()
                     category installation.getCategory()
