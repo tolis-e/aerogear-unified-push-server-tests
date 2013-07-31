@@ -16,11 +16,11 @@
  */
 package org.jboss.aerogear.connectivity.simplepush
 
-import javax.inject.Inject;
+import javax.inject.Inject
 import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AuthenticationUtils
-import org.jboss.aerogear.connectivity.common.Deployments;
+import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.aerogear.connectivity.common.InstallationUtils
 import org.jboss.aerogear.connectivity.common.PushApplicationUtils
 import org.jboss.aerogear.connectivity.common.PushNotificationSenderUtils
