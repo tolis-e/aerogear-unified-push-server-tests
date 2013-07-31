@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * 	http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,16 +18,16 @@ package org.jboss.aerogear.connectivity.restassured
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonOutput
+import spock.lang.Shared
 import spock.lang.Specification
 
-class JsonParserSpecification extends Specification {
+class JsonBuilderSpecification extends ParentSpecification {
 
     def "JSON map and non-map syntax"() {
         given: "Two JSON builders"
-        def json = new JsonBuilder();
 
         when: "Creating a JSON using map and non-map syntax"
-        def string1 = JsonOutput.toJson(json.call() {
+        def string1 = JsonOutput.toJson(json {
             foo: "bar"
             name: "namebar"
         });
@@ -47,5 +47,14 @@ class JsonParserSpecification extends Specification {
 
         and: "Non JSON Map syntax yields correct JSON object"
         string3 == string2
+    }
+}
+
+abstract class ParentSpecification extends Specification {
+
+    def Closure json = new Closure(this, this) {
+        def doCall(Object args) {
+            new JsonBuilder().call(args)
+        }
     }
 }

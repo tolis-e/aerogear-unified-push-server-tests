@@ -16,22 +16,19 @@
  */
 package org.jboss.aerogear.connectivity.simplepush
 
-import java.net.URL;
-
-
-import com.jayway.restassured.RestAssured
 import groovy.json.JsonBuilder
 
+import org.jboss.aerogear.connectivity.common.AdminLogin
+import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.arquillian.container.test.api.Deployment
+import org.jboss.arquillian.spock.ArquillianSpecification
 import org.jboss.arquillian.test.api.ArquillianResource
 import org.jboss.shrinkwrap.api.spec.WebArchive
-import spock.lang.Specification
 
 import spock.lang.Shared
+import spock.lang.Specification
 
-import org.jboss.arquillian.spock.ArquillianSpecification
-import org.jboss.aerogear.connectivity.common.AdminLogin;
-import org.jboss.aerogear.connectivity.common.Deployments;
+import com.jayway.restassured.RestAssured
 
 @ArquillianSpecification
 @Mixin(AdminLogin)
@@ -51,12 +48,13 @@ class RegisterVariantsSpecification extends Specification {
 
     def setup() {
         authCookies = authCookies ? authCookies : login()
+        //RestAssured.filters(new RequestLoggingFilter(System.err), new ResponseLoggingFilter(System.err))
     }
 
     // curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"name" : "ddd", "description" :  "ddd" }' http://localhost:8080/ag-push/rest/
     def "Registering a push application"() {
 
-        given: "Application My App is about to be registered......"
+        given: "Application ddd is about to be registered......"
         def json = new JsonBuilder()
         def request = RestAssured.given()
                 .contentType("application/json")
@@ -75,18 +73,18 @@ class RegisterVariantsSpecification extends Specification {
         then: "Response code 201 is returned"
         response.statusCode() == 201
 
-        and: "Push App Id is not null"
+        and: "Push App Id is returned"
         pushAppId != null
 
-        and: "AppName is not null"
+        and: "Application Name is returned"
         body.get("name") == "ddd"
     }
 
 
     // curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"pushNetworkURL" : "http://localhost:7777/endpoint/"}' http://localhost:8080/ag-push/rest/applications/{PUSH_ID}/simplePush
-    def "Registering a simple push mobile variant instance"() {
+    def "Registering a SimplePush variant instance"() {
 
-        given: "Variant of ddd application is about to be registered......"
+        given: "SimplePush variant of ddd application is about to be registered......"
         def json = new JsonBuilder()
         def request = RestAssured.given()
                 .contentType("application/json")
@@ -97,19 +95,84 @@ class RegisterVariantsSpecification extends Specification {
                     pushNetworkURL "http://localhost:7777/endpoint/"
                 })
 
-        when: "Variant is registered"
+        when: "SimplePush variant is registered"
         def response = RestAssured.given().spec(request).post("${root}rest/applications/${pushAppId}/simplePush ")
         def body = response.body().jsonPath()
 
         then: "Response code 201 is returned"
         response.statusCode() == 201
 
-        and: "Variant Id is not null"
+        and: "Mobile variant Id is returned"
         body.get("variantID") != null
 
-        and: "Variant name is not null"
-        body.get("name") == "ddd simple push variant"
+        and: "Secret is returned"
+        body.get("secret") != null
 
+        and: "Mobile Variant name is returned"
+        body.get("name") == "ddd simple push variant"
     }
+
+    //    curl -v -b cookies.txt -c cookies.txt
+    //    -i -H "Accept: application/json" -H "Content-type: multipart/form-data"
+    //    -F "certificate=@/Users/matzew/Desktop/MyCert.p12"
+    //    -F "passphrase=TopSecret"
+    //
+    //    -X POST http://localhost:8080/ag-push/rest/applications/{PUSH_ID}/iOS
+    def "Registering an iOS mobile variant instance"() {
+        given: "iOS variant of ddd application is about to be registered......"
+        def request = RestAssured.given()
+                .contentType("multipart/form-data")
+                .header("Accept", "application/json")
+                .cookies(authCookies)
+                // TODO this might be needed to be replaced with real stuff on command line
+                .multiPart("certificate", new File("src/test/resources/certs/qaAerogear.p12"))
+                .multiPart("passphrase", "aerogear")
+                .multiPart("production", "false")
+
+        when: "iOS Mobile variant is registered"
+        def response = RestAssured.given().spec(request).post("${root}rest/applications/${pushAppId}/iOS")
+        def body = response.body().jsonPath()
+
+        then: "Response code is 201"
+        response.statusCode() == 201
+
+        and: "Mobile variant Id is returned"
+        body.get("variantID") != null
+
+        and: "Secret is returned"
+        body.get("secret") != null
+    }
+
+    //curl -v -b cookies.txt -c cookies.txt
+    //  -v -H "Accept: application/json" -H "Content-type: application/json"
+    //  -X POST
+    //  -d '{"googleKey" : "IDDASDASDSA"}'
+    //
+    //  http://localhost:8080/ag-push/rest/applications/{PUSH_ID}/android
+    def "Registering an Android mobile variant instance"() {
+        given: "Android variant of ddd application is about to be registered......"
+		def json = new JsonBuilder()
+        def request = RestAssured.given()
+                .contentType("application/json")
+                .header("Accept", "application/json")
+                .cookies(authCookies)
+                .body(json { googleKey "IDDASDASDSA" })
+
+        when: "Android Mobile variant is registered"
+        def response = RestAssured.given().spec(request).post("${root}rest/applications/${pushAppId}/android")
+        def body = response.body().jsonPath()
+
+        then: "Response code 201 is returned"
+        response.statusCode() == 201
+
+        and: "Mobile variant Id is returned"
+        body.get("variantID") != null
+
+        and: "Secret is returned"
+        body.get("secret") != null
+	 }
+
+
+
 }
 

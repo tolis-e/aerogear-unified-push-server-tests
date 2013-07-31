@@ -56,7 +56,7 @@ class RegisterReadDeletePushAppSpecification extends Specification {
 
     def setup() {
         authCookies = authCookies ? authCookies : login()
-        RestAssured.filters(new RequestLoggingFilter(System.err), new ResponseLoggingFilter(System.err))
+        // RestAssured.filters(new RequestLoggingFilter(System.err), new ResponseLoggingFilter(System.err))
     }
 
     def "Registering a push application"() {

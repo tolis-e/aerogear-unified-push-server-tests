@@ -57,7 +57,7 @@ class Deployments {
         return war
     }
 
-    def static WebArchive unifiedPushServerWithClasses(Class... clazz) {
+    def static WebArchive unifiedPushServerWithClasses(Class<?>... clazz) {
 
         def unifiedPushServerPom = System.getProperty("unified.push.server.location", "aerogear-unified-push-server/pom.xml")
 
