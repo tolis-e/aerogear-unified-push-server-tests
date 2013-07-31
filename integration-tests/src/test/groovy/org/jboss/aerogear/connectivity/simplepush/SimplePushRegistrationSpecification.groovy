@@ -16,6 +16,7 @@
  */
 package org.jboss.aerogear.connectivity.simplepush
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AuthenticationUtils
@@ -27,6 +28,9 @@ import org.jboss.aerogear.connectivity.common.SimplePushVariantUtils
 import org.jboss.aerogear.connectivity.model.InstallationImpl
 import org.jboss.aerogear.connectivity.model.PushApplication
 import org.jboss.aerogear.connectivity.model.SimplePushVariant
+import org.jboss.aerogear.connectivity.service.ClientInstallationService
+import org.jboss.aerogear.connectivity.service.PushApplicationService
+import org.jboss.aerogear.connectivity.service.SimplePushVariantService
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.container.test.api.RunAsClient
 import org.jboss.arquillian.spock.ArquillianSpecification
@@ -87,6 +91,15 @@ class SimplePushRegistrationSpecification extends Specification {
 
     @Shared def static simplePushSecret
 
+    @Inject
+    private PushApplicationService pushAppService
+    
+    @Inject
+    private SimplePushVariantService simplePushVariantService
+    
+    @Inject
+    private ClientInstallationService clientInstallationService
+    
     @RunAsClient
     def "Authenticate"() {
         when:
@@ -195,5 +208,36 @@ class SimplePushRegistrationSpecification extends Specification {
 
         and: "Response status code is 200"
         response != null && response.statusCode() == Status.OK.getStatusCode()
+    }
+    
+    def "Verify that registrations were done"() {
+        
+        when: "Getting all the Push Applications for the user"
+        def List<PushApplication> pushApps = pushAppService.findAllPushApplicationsForDeveloper(AUTHORIZED_LOGIN_NAME)
+        
+        and: "Getting the Simple Push variants"
+        def List<SimplePushVariant> simplePushVariants = simplePushVariantService.findAllSimplePushVariants()
+        def SimplePushVariant simplePushVariant = simplePushVariants != null ? simplePushVariants.get(0) : null
+        
+        and: "Getting the registered tokens by variant id"
+        def List<String> deviceTokens = clientInstallationService.findAllDeviceTokenForVariantID(simplePushVariant.getVariantID())
+        
+        then: "Injections have been done"
+        pushAppService != null && simplePushVariantService != null && clientInstallationService != null
+        
+        and: "The previously registered push app is included in the list"
+        pushApps != null && pushApps.size() == 1 && nameExistsInList(PUSH_APPLICATION_NAME, pushApps)
+        
+        and: "A Simple Push variant exists"
+        simplePushVariants != null && simplePushVariants.size() == 1 && simplePushVariant != null
+        
+        and: "The android variant has the expected name"
+        SIMPLE_PUSH_VARIANT_NAME.equals(simplePushVariant.getName())
+        
+        and: "The registered device tokens should not be empty"
+        deviceTokens != null
+        
+        and: "The registered device tokens should contain the registered SimplePush token"
+        deviceTokens.contains(SIMPLE_PUSH_DEVICE_TOKEN)
     }
 }
