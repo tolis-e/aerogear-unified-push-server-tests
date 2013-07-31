@@ -18,6 +18,7 @@ package org.jboss.aerogear.connectivity.androidpush
 
 import java.util.concurrent.Callable
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AndroidVariantUtils
@@ -33,6 +34,8 @@ import org.jboss.aerogear.connectivity.model.InstallationImpl
 import org.jboss.aerogear.connectivity.model.PushApplication
 import org.jboss.aerogear.connectivity.model.SimplePushVariant
 import org.jboss.aerogear.connectivity.rest.util.iOSApplicationUploadForm
+import org.jboss.aerogear.connectivity.service.AndroidVariantService
+import org.jboss.aerogear.connectivity.service.ClientInstallationService
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.container.test.api.RunAsClient
 import org.jboss.arquillian.spock.ArquillianSpecification
@@ -156,6 +159,12 @@ class AndroidSelectiveSendFilteredByOsSpecification extends Specification {
     @Shared def static iOSVariantId
 
     @Shared def static iOSPushSecret
+    
+    @Inject
+    private AndroidVariantService androidVariantService
+    
+    @Inject
+    private ClientInstallationService clientInstallationService
 
     @RunAsClient
     def "Authenticate"() {
@@ -407,5 +416,23 @@ class AndroidSelectiveSendFilteredByOsSpecification extends Specification {
 
         and: "The message sent is the correct one"
         Sender.gcmMessage != null && NOTIFICATION_ALERT_MSG.equals(Sender.gcmMessage.getData().get("alert"))
+    }
+    
+    // The GCM Sender returns the tokens as inactive so they should have been deleted
+    def "Verify that the inactive tokens were deleted"() {
+        
+        when: "Getting the Android variants"
+        def List<AndroidVariant> androidVariants = androidVariantService.findAllAndroidVariants()
+        def AndroidVariant androidVariant = androidVariants != null ? androidVariants.get(0) : null
+        
+        and: "Getting the registered tokens by variant id"
+        def List<String> deviceTokens = clientInstallationService.findAllDeviceTokenForVariantID(androidVariant.getVariantID())
+        
+        then: "Injections have been done"
+        androidVariantService != null && clientInstallationService != null
+        
+        and: "The inactive device tokens do not exist"
+        deviceTokens != null
+        !deviceTokens.contains(ANDROID_DEVICE_TOKEN) && !deviceTokens.contains(ANDROID_DEVICE_TOKEN_2) && !deviceTokens.contains(ANDROID_DEVICE_TOKEN_3)
     }
 }
