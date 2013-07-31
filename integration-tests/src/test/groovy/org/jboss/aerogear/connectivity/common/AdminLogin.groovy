@@ -40,7 +40,7 @@ class AdminLogin {
 				.post("${root}rest/auth/login")
 
 		// we need to change the password
-		if(response.getStatusCode()==205) {
+		if(response.getStatusCode()==409) {
 			def cookies = response.getDetailedCookies()
 			assert cookies !=null
 			response = RestAssured.given()
