@@ -18,6 +18,7 @@ package org.jboss.aerogear.connectivity.common
 
 import groovy.json.JsonBuilder
 
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.aerogear.connectivity.model.PushApplication
 
 import com.jayway.restassured.RestAssured
@@ -33,6 +34,28 @@ class PushApplicationUtils {
         pushApp.setMasterSecret(masterSecret)
         pushApp.setDeveloper(developer)
         return pushApp
+    }
+            
+    def appIdExistsInList(String pushAppId, List<PushApplication> pushAppsList) {
+        if (!StringUtils.isEmpty(pushAppId) && pushAppsList != null) {
+            for (PushApplication pushApp : pushAppsList) {
+                if (pushApp != null && pushAppId.equals(pushApp.getPushApplicationID())) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
+    def nameExistsInList(String pushAppName, List<PushApplication> pushAppsList) {
+        if (!StringUtils.isEmpty(pushAppName) && pushAppsList != null) {
+            for (PushApplication pushApp : pushAppsList) {
+                if (pushApp != null && pushAppName.equals(pushApp.getName())) {
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     def registerPushApplication(PushApplication pushApp, Map<String, ?> cookies, String contentType) {

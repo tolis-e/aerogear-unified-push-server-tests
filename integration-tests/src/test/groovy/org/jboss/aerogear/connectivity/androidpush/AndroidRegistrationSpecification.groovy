@@ -16,6 +16,9 @@
  */
 package org.jboss.aerogear.connectivity.androidpush
 
+import java.util.List;
+
+import javax.inject.Inject;
 import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AndroidVariantUtils
@@ -26,6 +29,9 @@ import org.jboss.aerogear.connectivity.common.PushApplicationUtils
 import org.jboss.aerogear.connectivity.model.AndroidVariant
 import org.jboss.aerogear.connectivity.model.InstallationImpl
 import org.jboss.aerogear.connectivity.model.PushApplication
+import org.jboss.aerogear.connectivity.service.AndroidVariantService;
+import org.jboss.aerogear.connectivity.service.ClientInstallationService;
+import org.jboss.aerogear.connectivity.service.PushApplicationService;
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.container.test.api.RunAsClient
 import org.jboss.arquillian.spock.ArquillianSpecification
@@ -78,9 +84,9 @@ class AndroidRegistrationSpecification extends Specification {
 
     private final static URL root = new URL("http://localhost:8080/ag-push/")
 
-    @Deployment(testable=false)
+    @Deployment(testable=true)
     def static WebArchive "create deployment"() {
-        Deployments.unifiedPushServer()
+        Deployments.customUnifiedPushServerWithClasses(AndroidRegistrationSpecification.class)
     }
 
     @Shared def static authCookies
@@ -92,6 +98,15 @@ class AndroidRegistrationSpecification extends Specification {
     @Shared def static androidVariantId
 
     @Shared def static androidSecret
+
+    @Inject
+    private AndroidVariantService androidVariantService
+    
+    @Inject
+    private PushApplicationService pushAppService
+    
+    @Inject
+    private ClientInstallationService clientInstallationService
 
     @RunAsClient
     def "Authenticate"() {
@@ -233,5 +248,36 @@ class AndroidRegistrationSpecification extends Specification {
 
         and: "Response status code is 200"
         response != null && response.statusCode() == Status.OK.getStatusCode()
+    }
+
+    def "Verify that registrations were done"() {
+
+        when: "Getting all the Push Applications for the user"
+        def List<PushApplication> pushApps = pushAppService.findAllPushApplicationsForDeveloper(AUTHORIZED_LOGIN_NAME)
+        
+        and: "Getting the Android variants"
+        def List<AndroidVariant> androidVariants = androidVariantService.findAllAndroidVariants()
+        def AndroidVariant androidVariant = androidVariants != null ? androidVariants.get(0) : null
+        
+        and: "Getting the registered tokens by variant id"
+        def List<String> deviceTokens = clientInstallationService.findAllDeviceTokenForVariantID(androidVariant.getVariantID())
+        
+        then: "Injections have been done"
+        pushAppService != null && androidVariantService != null && clientInstallationService != null
+        
+        and: "The previously registered push app is included in the list"
+        pushApps != null && pushApps.size() == 1 && nameExistsInList(PUSH_APPLICATION_NAME, pushApps)
+        
+        and: "An android variant exists"
+        androidVariants != null && androidVariants.size() == 1 && androidVariant != null
+        
+        and: "The android variant has the expected Google Key"
+        ANDROID_VARIANT_GOOGLE_KEY.equals(androidVariant.getGoogleKey())
+        
+        and: "The registered device tokens should not be empty"
+        deviceTokens != null 
+        
+        and: "The registered device tokens should contain the 3 registered Android tokens"
+        deviceTokens.contains(ANDROID_DEVICE_TOKEN) && deviceTokens.contains(ANDROID_DEVICE_TOKEN_2) && deviceTokens.contains(ANDROID_DEVICE_TOKEN_3)
     }
 }
