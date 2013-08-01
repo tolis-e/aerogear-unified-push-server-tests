@@ -8,6 +8,7 @@ jdk:
 #  NOTE: before install is likely not needed as travis fetches submodules ootb
 before_install:
   - git submodule update --init --recursive
+  - git submodule foreach "git pull && git checkout master"
 #  install phase is skipped, as we don't need it and it saves time
 install: true
 script:
