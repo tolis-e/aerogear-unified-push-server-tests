@@ -23,11 +23,11 @@ import org.jboss.aerogear.connectivity.users.Developer
 import com.jayway.restassured.RestAssured
 
 class AuthenticationUtils {
-	
+
 	def static final String NEWPASSWORD = "aerogear123"
-	
+
 	def static final String ADMIN_LOGIN_NAME = "admin"
-	
+
 	def static final String ADMIN_PASSWORD = "123"
 
 	def login(String loginNameStr, String passwordStr) {
@@ -45,7 +45,7 @@ class AuthenticationUtils {
 				.post("${root}rest/auth/login")
 
 		// we need to change the password
-		if(response.getStatusCode()==205) {
+		if(response.getStatusCode()==403) {
 			def cookies = response.getDetailedCookies()
 			assert cookies !=null
 			response = RestAssured.given()
@@ -75,7 +75,7 @@ class AuthenticationUtils {
 
 		return response
 	}
-	
+
 	def adminLogin() {
 		return login(ADMIN_LOGIN_NAME, ADMIN_PASSWORD)
 	}
