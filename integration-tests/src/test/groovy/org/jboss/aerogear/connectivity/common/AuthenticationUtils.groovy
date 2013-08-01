@@ -25,6 +25,10 @@ import com.jayway.restassured.RestAssured
 class AuthenticationUtils {
 	
 	def static final String NEWPASSWORD = "aerogear123"
+	
+	def static final String ADMIN_LOGIN_NAME = "admin"
+	
+	def static final String ADMIN_PASSWORD = "123"
 
 	def login(String loginNameStr, String passwordStr) {
 		assert root !=null
@@ -70,6 +74,10 @@ class AuthenticationUtils {
 				.when().post("${root}rest/auth/login")
 
 		return response
+	}
+	
+	def adminLogin() {
+		return login(ADMIN_LOGIN_NAME, ADMIN_PASSWORD)
 	}
 
 	def createDeveloper(String loginName, String password) {

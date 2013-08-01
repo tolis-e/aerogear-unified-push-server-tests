@@ -18,21 +18,24 @@ package org.jboss.aerogear.connectivity.simplepush;
 
 
 import com.jayway.restassured.RestAssured
+
 import groovy.json.JsonBuilder
+
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSpecification
 import org.jboss.arquillian.test.api.ArquillianResource
-import org.jboss.aerogear.connectivity.common.AdminLogin
 import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.shrinkwrap.api.spec.WebArchive
+
 import spock.lang.Shared
 import spock.lang.Specification
+
 import com.jayway.restassured.filter.log.RequestLoggingFilter
 import com.jayway.restassured.filter.log.ResponseLoggingFilter
+
 import org.apache.http.entity.ContentType
 
 @ArquillianSpecification
-@Mixin(AdminLogin)
 class RegisterPushAppWithoutLoginSpecification extends Specification {
 
     @ArquillianResource

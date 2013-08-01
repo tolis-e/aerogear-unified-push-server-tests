@@ -24,7 +24,7 @@ import groovy.json.JsonBuilder
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSpecification
 import org.jboss.arquillian.test.api.ArquillianResource
-import org.jboss.aerogear.connectivity.common.AdminLogin
+import org.jboss.aerogear.connectivity.common.AuthenticationUtils
 import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.shrinkwrap.api.spec.WebArchive
 import spock.lang.Shared
@@ -39,7 +39,7 @@ import javax.persistence.EntityManager
 import groovy.json.JsonSlurper
 
 @ArquillianSpecification
-@Mixin(AdminLogin)
+@Mixin(AuthenticationUtils)
 class RegisterReadDeletePushAppSpecification extends Specification {
 
 
@@ -55,7 +55,7 @@ class RegisterReadDeletePushAppSpecification extends Specification {
     @Shared def pushAppId
 
     def setup() {
-        authCookies = authCookies ? authCookies : login()
+        authCookies = authCookies ? authCookies : adminLogin().getDetailedCookies()
         // RestAssured.filters(new RequestLoggingFilter(System.err), new ResponseLoggingFilter(System.err))
     }
 

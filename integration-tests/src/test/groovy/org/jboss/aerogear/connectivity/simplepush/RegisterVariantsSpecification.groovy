@@ -18,7 +18,7 @@ package org.jboss.aerogear.connectivity.simplepush
 
 import groovy.json.JsonBuilder
 
-import org.jboss.aerogear.connectivity.common.AdminLogin
+import org.jboss.aerogear.connectivity.common.AuthenticationUtils
 import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSpecification
@@ -31,7 +31,7 @@ import spock.lang.Specification
 import com.jayway.restassured.RestAssured
 
 @ArquillianSpecification
-@Mixin(AdminLogin)
+@Mixin(AuthenticationUtils)
 class RegisterVariantsSpecification extends Specification {
 
     @ArquillianResource
@@ -47,7 +47,7 @@ class RegisterVariantsSpecification extends Specification {
     @Shared def authCookies
 
     def setup() {
-        authCookies = authCookies ? authCookies : login()
+        authCookies = authCookies ? authCookies : adminLogin().getDetailedCookies()
         //RestAssured.filters(new RequestLoggingFilter(System.err), new ResponseLoggingFilter(System.err))
     }
 

@@ -18,7 +18,7 @@ package org.jboss.aerogear.connectivity.simplepush;
 
 import groovy.json.JsonBuilder
 
-import org.jboss.aerogear.connectivity.common.AdminLogin
+import org.jboss.aerogear.connectivity.common.AuthenticationUtils
 import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.arquillian.container.test.api.Deployment
 import org.jboss.arquillian.spock.ArquillianSpecification
@@ -36,7 +36,7 @@ import com.jayway.restassured.config.RestAssuredConfig
 
 
 @ArquillianSpecification
-@Mixin(AdminLogin)
+@Mixin(AuthenticationUtils)
 class RegisterPushAppSpecification extends Specification {
 
     @ArquillianResource
@@ -65,7 +65,7 @@ class RegisterPushAppSpecification extends Specification {
     }
 
     def setup() {
-        authCookies = authCookies ? authCookies : login()
+        authCookies = authCookies ? authCookies : adminLogin().getDetailedCookies()
     }
 
     // curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"name" : "MyApp", "description" :  "awesome app" }'
