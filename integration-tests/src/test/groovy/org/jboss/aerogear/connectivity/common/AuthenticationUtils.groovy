@@ -54,7 +54,8 @@ class AuthenticationUtils {
 					.cookies(cookies)
 					.body( json {
 						loginName loginNameStr
-						password NEWPASSWORD
+						password passwordStr
+						newPassword NEWPASSWORD
 					})
 					.put("${root}rest/auth/update")
 

@@ -77,8 +77,12 @@ class IosRegistrationSpecification extends Specification {
     private final static int NOTIFICATION_BADGE = 7
 
     private final static String IOS_VARIANT_NAME = "IOS_Variant__1"
+	
+	private final static String UPDATED_IOS_VARIANT_NAME = "IOS_Variant__2"
 
     private final static String IOS_VARIANT_DESC = "awesome variant__1"
+	
+	private final static String UPDATED_IOS_VARIANT_DESC = "awesome variant__2"
 
     private final static String IOS_DEVICE_TOKEN = "abcd123456"
 
@@ -161,11 +165,11 @@ class IosRegistrationSpecification extends Specification {
     @RunAsClient
     def "Register an iOS Variant - Bad Case - Missing auth cookies"() {
         given: "An iOS application form"
-        def variant = createiOSApplicationUploadForm(Boolean.FALSE, IOS_CERTIFICATE_PASS_PHRASE, null,
+        def form = createiOSApplicationUploadForm(Boolean.FALSE, IOS_CERTIFICATE_PASS_PHRASE, null,
                 IOS_VARIANT_NAME, IOS_VARIANT_DESC)
 
         when: "iOS Variant is registered"
-        def response = registerIOsVariant(pushApplicationId, (iOSApplicationUploadForm)variant, new HashMap<String, ?>(),
+        def response = registerIOsVariant(pushApplicationId, (iOSApplicationUploadForm)form, new HashMap<String, ?>(),
                 IOS_CERTIFICATE_PATH)
 
         then: "Push Application id is not empty"
@@ -178,11 +182,11 @@ class IosRegistrationSpecification extends Specification {
     @RunAsClient
     def "Register an iOS Variant"() {
         given: "An iOS application form"
-        def variant = createiOSApplicationUploadForm(Boolean.FALSE, IOS_CERTIFICATE_PASS_PHRASE, null,
+        def form = createiOSApplicationUploadForm(Boolean.FALSE, IOS_CERTIFICATE_PASS_PHRASE, null,
                 IOS_VARIANT_NAME, IOS_VARIANT_DESC)
 
         when: "iOS Variant is registered"
-        def response = registerIOsVariant(pushApplicationId, (iOSApplicationUploadForm)variant, authCookies,
+        def response = registerIOsVariant(pushApplicationId, (iOSApplicationUploadForm)form, authCookies,
                 IOS_CERTIFICATE_PATH)
         def body = response.body().jsonPath()
         iOSVariantId = body.get("variantID")
@@ -200,7 +204,85 @@ class IosRegistrationSpecification extends Specification {
         and: "iOS Secret is not empty"
         iOSPushSecret != null
     }
+	
+	@RunAsClient
+	def "Update an iOS Variant - Patch Case"() {
+		given: "An iOS application form"
+		def form = createiOSApplicationUploadForm(Boolean.TRUE, null, null,
+				UPDATED_IOS_VARIANT_NAME, UPDATED_IOS_VARIANT_DESC)
 
+		when: "iOS Variant is updated"
+		def response = updateIOsVariantPatch(pushApplicationId, (iOSApplicationUploadForm)form, authCookies,
+				iOSVariantId)
+
+		then: "Push Application id and iOSVariantId are not empty"
+		pushApplicationId != null && iOSVariantId != null
+
+		and: "Response status code is 204"
+		response != null && response.statusCode() == Status.NO_CONTENT.getStatusCode()
+	}
+	
+	def "Verify that update patch was done"() {
+		
+		when: "Getting the iOS variants"
+		def List<iOSVariant> iOSVariants = iosVariantService.findAlliOSVariants()
+		def iOSVariant = iOSVariants != null ? iOSVariants.get(0) : null
+		
+		then: "Injections have been done"
+		iosVariantService != null
+		
+		and: "An iOS variant exists"
+		iOSVariants != null && iOSVariants.size() == 1 && iOSVariant != null
+		
+		and: "The iOS variant has the expected name"
+		UPDATED_IOS_VARIANT_NAME.equals(iOSVariant.getName())
+		
+		and: "The iOS variant has the expected desc"
+		UPDATED_IOS_VARIANT_DESC.equals(iOSVariant.getDescription())
+		
+		and: "The iOS variant has the expected prod flag"
+		!iOSVariant.isProduction()
+	}
+	
+	@RunAsClient
+	def "Update an iOS Variant - Normal Case"() {
+		given: "An iOS application form"
+		def form = createiOSApplicationUploadForm(Boolean.TRUE, IOS_CERTIFICATE_PASS_PHRASE, null,
+                IOS_VARIANT_NAME, IOS_VARIANT_DESC)
+
+		when: "iOS Variant is updated"
+		def response = updateIOsVariant(pushApplicationId, (iOSApplicationUploadForm)form, authCookies,
+                IOS_CERTIFICATE_PATH, iOSVariantId)
+
+		then: "Push Application id and iOSVariantId are not empty"
+		pushApplicationId != null && iOSVariantId != null
+
+		and: "Response status code is 204"
+		response != null && response.statusCode() == Status.NO_CONTENT.getStatusCode()
+	}
+
+	def "Verify that update was done"() {
+		
+		when: "Getting the iOS variants"
+		def List<iOSVariant> iOSVariants = iosVariantService.findAlliOSVariants()
+		def iOSVariant = iOSVariants != null ? iOSVariants.get(0) : null
+		
+		then: "Injections have been done"
+		iosVariantService != null
+		
+		and: "An iOS variant exists"
+		iOSVariants != null && iOSVariants.size() == 1 && iOSVariant != null
+		
+		and: "The iOS variant has the expected name"
+		IOS_VARIANT_NAME.equals(iOSVariant.getName())
+		
+		and: "The iOS variant has the expected desc"
+		IOS_VARIANT_DESC.equals(iOSVariant.getDescription())
+		
+		and: "The iOS variant has the expected prod flag"
+		iOSVariant.isProduction()
+	}
+	
     @RunAsClient
     def "Register an installation for an iOS device"() {
 
