@@ -79,7 +79,7 @@ class Deployments {
         return war
     }
     
-    def static WebArchive customUnifiedPushServerWithClasses(Class... clazz) {
+    def static WebArchive customUnifiedPushServerWithClasses(Class<?>... clazz) {
         def unifiedPushServerPom = System.getProperty("unified.push.server.location", "aerogear-unified-push-server/pom.xml")
         
         WebArchive war = ShrinkWrap.create(MavenImporter.class).loadPomFromFile(unifiedPushServerPom).importBuildOutput()

@@ -40,63 +40,72 @@ import com.notnoop.apns.ApnsService;
 
 /**
  * 
- * This class mocks the original com.notnoop.apns.internal.ApnsServiceImpl class and is used for testing reasons.
+ * This class mocks the original com.notnoop.apns.internal.ApnsServiceImpl class
+ * and is used for testing reasons.
  * 
  */
 public class ApnsServiceImpl implements ApnsService {
 
-    public ApnsServiceImpl() {
+	public ApnsServiceImpl() {
 
-    }
+	}
 
-    public static Collection<String> tokensList = null;
+	public static Collection<String> tokensList = null;
 
-    public static String alert = null;
+	public static String alert = null;
 
-    public static String sound = null;
+	public static String sound = null;
 
-    public static int badge = -1;
+	public static int badge = -1;
 
-    public void start() {
-    }
+	public void start() {
+	}
 
-    public void stop() {
-    }
+	public void stop() {
+	}
 
-    public void testConnection() {
+	public void testConnection() {
 
-    }
+	}
 
-    public Map<String, Date> getInactiveDevices() {
-        return new HashMap<String, Date>();
-    }
+	public Map<String, Date> getInactiveDevices() {
+		final HashMap<String, Date> inactiveTokensHM = new HashMap<String, Date>();
 
-    @SuppressWarnings("rawtypes")
-    public Collection push(Collection<String> tokens, String message) {
-        if (tokens != null) {
-            tokensList = new ArrayList<String>();
-            tokensList.addAll(tokens);
-        }
+		if (tokensList != null) {
+			for (String token : tokensList) {
+				inactiveTokensHM.put(token, new Date());
+			}
+		}
+		return inactiveTokensHM;
+	}
 
-        if (message != null) {
-            String[] parts = message.split(",");
-            for (String part : parts) {
-                String[] subparts = part.split(":");
-                if ("alert".equals(subparts[0]))
-                    alert = subparts[1];
-                else if ("sound".equals(subparts[0]))
-                    sound = subparts[1];
-                else
-                    badge = subparts[1] != null ? Integer.parseInt(subparts[1]) : -1;
-            }
-        }
-        return null;
-    }
+	@SuppressWarnings("rawtypes")
+	public Collection push(Collection<String> tokens, String message) {
+		if (tokens != null) {
+			tokensList = new ArrayList<String>();
+			tokensList.addAll(tokens);
+		}
 
-    public static void clear() {
-        tokensList = null;
-        alert = null;
-        sound = null;
-        badge = -1;
-    }
+		if (message != null) {
+			String[] parts = message.split(",");
+			for (String part : parts) {
+				String[] subparts = part.split(":");
+				if ("alert".equals(subparts[0]))
+					alert = subparts[1];
+				else if ("sound".equals(subparts[0]))
+					sound = subparts[1];
+				else
+					badge = subparts[1] != null ? Integer.parseInt(subparts[1])
+							: -1;
+			}
+		}
+		return null;
+	}
+
+	public static void clear() {
+		tokensList = null;
+		alert = null;
+		sound = null;
+		badge = -1;
+	}
 }
