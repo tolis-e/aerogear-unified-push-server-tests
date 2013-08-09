@@ -1,10 +1,9 @@
 language: java
 jdk:
   - openjdk7
-# Temporarily disabled
-#  - oraclejdk7
-#  - openjdk6
-#  - oraclejdk6
+  - oraclejdk7
+  - openjdk6
+  - oraclejdk6
 #  NOTE: before install is likely not needed as travis fetches submodules ootb
 before_install:
   - git submodule update --init --recursive
@@ -12,4 +11,4 @@ before_install:
 #  install phase is skipped, as we don't need it and it saves time
 install: true
 script:
-  - mvn -f integration-tests/pom.xml test
+  - mvn test

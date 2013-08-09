@@ -8,3 +8,4 @@ target/
 *.iml
 bin/
 *.properties
+aerogear-unified-push-server/*
