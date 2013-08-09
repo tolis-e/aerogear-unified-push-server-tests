@@ -17,7 +17,7 @@
 package org.jboss.aerogear.connectivity.simplepush
 
 
-import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status
 
 import com.jayway.restassured.RestAssured
 
@@ -40,38 +40,38 @@ import org.apache.http.entity.ContentType
 @ArquillianSpecification
 class RegisterPushAppWithoutLoginSpecification extends Specification {
 
-	@ArquillianResource
-	URL root
+    @ArquillianResource
+    URL root
 
-	@Deployment(testable=false)
-	def static WebArchive "create deployment"() {
-		Deployments.unifiedPushServer()
-	}
+    @Deployment(testable=false)
+    def static WebArchive "create deployment"() {
+        Deployments.unifiedPushServer()
+    }
 
-	//	def setup() {
-	//		RestAssured.filters(new RequestLoggingFilter(System.err), new ResponseLoggingFilter(System.err))
-	//	}
+    //	def setup() {
+    //		RestAssured.filters(new RequestLoggingFilter(System.err), new ResponseLoggingFilter(System.err))
+    //	}
 
-	def "Registering a push application without being logged"() {
+    def "Registering a push application without being logged"() {
 
-		given: "Trying to register application My App"
-		def json = new JsonBuilder()
-		def request = RestAssured.given()
-				.contentType("application/json")
-				.header("Accept", "application/json")
-				.body( json {
-					name "MyApp"
-					description "Not logged in app"
-				})
+        given: "Trying to register application My App"
+        def json = new JsonBuilder()
+        def request = RestAssured.given()
+                .contentType("application/json")
+                .header("Accept", "application/json")
+                .body( json {
+                    name "MyApp"
+                    description "Not logged in app"
+                })
 
-		when: "Application is registered"
-		def response = RestAssured.given().spec(request).post("${root}rest/applications")
-		def responseString = response.asString()
+        when: "Application is registered"
+        def response = RestAssured.given().spec(request).post("${root}rest/applications")
+        def responseString = response.asString()
 
-		then: "Response code 401 is returned"
-		response.statusCode() == Status.UNAUTHORIZED.getStatusCode()
+        then: "Response code 401 is returned"
+        response.statusCode() == Status.UNAUTHORIZED.getStatusCode()
 
-		and: "Error message"
-		responseString == "{message : User authentication failed }"
-	}
+        and: "Error message"
+        responseString == "{message : User authentication failed }"
+    }
 }

@@ -25,53 +25,53 @@ import com.jayway.restassured.RestAssured
 
 class PushApplicationUtils {
 
-	def createPushApplication(String name, String description, String pushApplicationID,
-			String masterSecret, String developer) {
-		PushApplication pushApp = new PushApplication()
-		pushApp.setName(name)
-		pushApp.setDescription(description)
-		pushApp.setPushApplicationID(pushApplicationID)
-		pushApp.setMasterSecret(masterSecret)
-		pushApp.setDeveloper(developer)
-		return pushApp
-	}
+    def createPushApplication(String name, String description, String pushApplicationID,
+            String masterSecret, String developer) {
+        PushApplication pushApp = new PushApplication()
+        pushApp.setName(name)
+        pushApp.setDescription(description)
+        pushApp.setPushApplicationID(pushApplicationID)
+        pushApp.setMasterSecret(masterSecret)
+        pushApp.setDeveloper(developer)
+        return pushApp
+    }
 
-	def appIdExistsInList(String pushAppId, List<PushApplication> pushAppsList) {
-		if (!StringUtils.isEmpty(pushAppId) && pushAppsList != null) {
-			for (PushApplication pushApp : pushAppsList) {
-				if (pushApp != null && pushAppId.equals(pushApp.getPushApplicationID())) {
-					return true
-				}
-			}
-		}
-		return false
-	}
+    def appIdExistsInList(String pushAppId, List<PushApplication> pushAppsList) {
+        if (!StringUtils.isEmpty(pushAppId) && pushAppsList != null) {
+            for (PushApplication pushApp : pushAppsList) {
+                if (pushApp != null && pushAppId.equals(pushApp.getPushApplicationID())) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
 
-	def nameExistsInList(String pushAppName, List<PushApplication> pushAppsList) {
-		if (!StringUtils.isEmpty(pushAppName) && pushAppsList != null) {
-			for (PushApplication pushApp : pushAppsList) {
-				if (pushApp != null && pushAppName.equals(pushApp.getName())) {
-					return true
-				}
-			}
-		}
-		return false
-	}
+    def nameExistsInList(String pushAppName, List<PushApplication> pushAppsList) {
+        if (!StringUtils.isEmpty(pushAppName) && pushAppsList != null) {
+            for (PushApplication pushApp : pushAppsList) {
+                if (pushApp != null && pushAppName.equals(pushApp.getName())) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
 
-	def registerPushApplication(PushApplication pushApp, Map<String, ?> cookies, String contentType) {
+    def registerPushApplication(PushApplication pushApp, Map<String, ?> cookies, String contentType) {
 
-		assert root !=null
+        assert root !=null
 
-		JsonBuilder json = new JsonBuilder()
-		def response = RestAssured.given()
-				.contentType(contentType == null ? "application/json" : contentType)
-				.header("Accept", "application/json")
-				.cookies(cookies)
-				.body( json {
-					name pushApp.getName()
-					description pushApp.getDescription()
-				}).post("${root}rest/applications")
+        JsonBuilder json = new JsonBuilder()
+        def response = RestAssured.given()
+                .contentType(contentType == null ? "application/json" : contentType)
+                .header("Accept", "application/json")
+                .cookies(cookies)
+                .body( json {
+                    name pushApp.getName()
+                    description pushApp.getDescription()
+                }).post("${root}rest/applications")
 
-		return response
-	}
+        return response
+    }
 }

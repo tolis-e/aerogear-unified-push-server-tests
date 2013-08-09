@@ -39,106 +39,106 @@ import com.jayway.restassured.config.RestAssuredConfig
 @Mixin(AuthenticationUtils)
 class RegisterPushAppSpecification extends Specification {
 
-	@ArquillianResource
-	URL root
+    @ArquillianResource
+    URL root
 
-	@Deployment(testable=false)
-	def static WebArchive "create deployment"() {
-		Deployments.unifiedPushServer()
-	}
+    @Deployment(testable=false)
+    def static WebArchive "create deployment"() {
+        Deployments.unifiedPushServer()
+    }
 
-	@Shared def authCookies
+    @Shared def authCookies
 
-	def setupSpec() {
-		// RestAssured uses ISO-8859-1 by default to encode all the stuff, this is not the same as curl does
-		// so we are changing RestAssuredConfiguration in order to change encoded/decoder config
-		// see https://code.google.com/p/rest-assured/wiki/ReleaseNotes16
-		RestAssured.config = RestAssuredConfig.newConfig()
-				.decoderConfig(DecoderConfig.decoderConfig().defaultContentCharset("UTF-8"))
-				.encoderConfig(EncoderConfig.encoderConfig().defaultContentCharset("UTF-8"))
-	}
+    def setupSpec() {
+        // RestAssured uses ISO-8859-1 by default to encode all the stuff, this is not the same as curl does
+        // so we are changing RestAssuredConfiguration in order to change encoded/decoder config
+        // see https://code.google.com/p/rest-assured/wiki/ReleaseNotes16
+        RestAssured.config = RestAssuredConfig.newConfig()
+                .decoderConfig(DecoderConfig.decoderConfig().defaultContentCharset("UTF-8"))
+                .encoderConfig(EncoderConfig.encoderConfig().defaultContentCharset("UTF-8"))
+    }
 
-	def cleanupSpec() {
-		RestAssured.config = RestAssuredConfig.newConfig()
-				.decoderConfig(DecoderConfig.decoderConfig().defaultContentCharset("ISO-8859-1"))
-				.encoderConfig(EncoderConfig.encoderConfig().defaultContentCharset("ISO-8859-1"))
-	}
+    def cleanupSpec() {
+        RestAssured.config = RestAssuredConfig.newConfig()
+                .decoderConfig(DecoderConfig.decoderConfig().defaultContentCharset("ISO-8859-1"))
+                .encoderConfig(EncoderConfig.encoderConfig().defaultContentCharset("ISO-8859-1"))
+    }
 
-	def setup() {
-		authCookies = authCookies ? authCookies : adminLogin().getDetailedCookies()
-	}
+    def setup() {
+        authCookies = authCookies ? authCookies : adminLogin().getDetailedCookies()
+    }
 
-	// curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"name" : "MyApp", "description" :  "awesome app" }'
-	// http://localhost:8080/ag-push/rest/applications
-	def "Registering a push application"() {
+    // curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"name" : "MyApp", "description" :  "awesome app" }'
+    // http://localhost:8080/ag-push/rest/applications
+    def "Registering a push application"() {
 
-		given: "Application is about to be registered"
-		def json = new JsonBuilder()
-		def request = RestAssured.given()
-				.contentType("application/json")
-				.header("Accept", "application/json")
-				.cookies(authCookies)
-				.body( json {
-					name "MyApp"
-					description "awesome app"
-				})
+        given: "Application is about to be registered"
+        def json = new JsonBuilder()
+        def request = RestAssured.given()
+                .contentType("application/json")
+                .header("Accept", "application/json")
+                .cookies(authCookies)
+                .body( json {
+                    name "MyApp"
+                    description "awesome app"
+                })
 
-		when: "Application is registered"
-		def response = RestAssured.given().spec(request).post("${root}rest/applications")
-		def body = response.body().jsonPath()
+        when: "Application is registered"
+        def response = RestAssured.given().spec(request).post("${root}rest/applications")
+        def body = response.body().jsonPath()
 
-		then: "Response code 201 is returned"
-		response.statusCode() == 201
+        then: "Response code 201 is returned"
+        response.statusCode() == 201
 
-		and: "Push App Id is not null"
-		body.get("pushApplicationID") != null
+        and: "Push App Id is not null"
+        body.get("pushApplicationID") != null
 
-		and: "Master Secret is not null"
-		body.get("masterSecret") != null
+        and: "Master Secret is not null"
+        body.get("masterSecret") != null
 
-		and: "Push App Name is MyApp"
-		body.get("name") == "MyApp"
-	}
+        and: "Push App Name is MyApp"
+        body.get("name") == "MyApp"
+    }
 
-	// note, in json description we cannot use GString ("Description of ${appName}")
-	// as it is converted to JSON a different way
-	@Unroll
-	def "Registering a push application with UTF8"() {
+    // note, in json description we cannot use GString ("Description of ${appName}")
+    // as it is converted to JSON a different way
+    @Unroll
+    def "Registering a push application with UTF8"() {
 
-		given: "Application ${appName} is about to be registered"
-		def json = new JsonBuilder()
-		def request = RestAssured.given()
-				.contentType(contentType)
-				.header("Accept", "application/json")
-				.cookies(authCookies)
-				.body( json {
-					name appName
-					description "Description of " + appName
-				})
+        given: "Application ${appName} is about to be registered"
+        def json = new JsonBuilder()
+        def request = RestAssured.given()
+                .contentType(contentType)
+                .header("Accept", "application/json")
+                .cookies(authCookies)
+                .body( json {
+                    name appName
+                    description "Description of " + appName
+                })
 
-		when: "Application ${appName} is registered"
-		def response = RestAssured.given().spec(request).post("${root}rest/applications")
-		def body = response.body().jsonPath()
+        when: "Application ${appName} is registered"
+        def response = RestAssured.given().spec(request).post("${root}rest/applications")
+        def body = response.body().jsonPath()
 
-		then: "Response code 201 is returned"
-		response.statusCode() == 201
+        then: "Response code 201 is returned"
+        response.statusCode() == 201
 
-		and: "Push Application Id is not null"
-		body.get("pushApplicationID") != null
+        and: "Push Application Id is not null"
+        body.get("pushApplicationID") != null
 
-		and: "Master Secret is not null"
-		body.get("masterSecret") != null
+        and: "Master Secret is not null"
+        body.get("masterSecret") != null
 
-		and: "Push App Name is ${appName}"
-		body.get("name") == appName
+        and: "Push App Name is ${appName}"
+        body.get("name") == appName
 
-		where:
-		appName                 | contentType
-		"AwesomeAppěščřžýáíéňľ" | "application/json; charset=utf-8"
-		"AwesomeAppவான்வழிe"   |  "application/json; charset=utf-8"
-		"AwesomeAppěščřžýáíéňľ" | "application/json"
-		"AwesomeAppவான்வழிe"   | "application/json"
-	}
+        where:
+        appName                 | contentType
+        "AwesomeAppěščřžýáíéňľ" | "application/json; charset=utf-8"
+        "AwesomeAppவான்வழிe"   |  "application/json; charset=utf-8"
+        "AwesomeAppěščřžýáíéňľ" | "application/json"
+        "AwesomeAppவான்வழிe"   | "application/json"
+    }
 
 
 }

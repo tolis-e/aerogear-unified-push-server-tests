@@ -24,79 +24,79 @@ import com.jayway.restassured.RestAssured
 
 class iOSVariantUtils {
 
-	def createiOSApplicationUploadForm(Boolean production, String passphrase, byte[] certificate,
-			String name, String description) {
+    def createiOSApplicationUploadForm(Boolean production, String passphrase, byte[] certificate,
+            String name, String description) {
 
-		def ios = new iOSApplicationUploadForm()
+        def ios = new iOSApplicationUploadForm()
 
-		ios.setCertificate(certificate)
-		ios.setDescription(description)
-		ios.setName(name)
-		ios.setPassphrase(passphrase)
-		ios.setProduction(production)
+        ios.setCertificate(certificate)
+        ios.setDescription(description)
+        ios.setName(name)
+        ios.setPassphrase(passphrase)
+        ios.setProduction(production)
 
-		return ios
-	}
+        return ios
+    }
 
-	def registerIOsVariant(String pushAppId, iOSApplicationUploadForm form, Map<String, ?> cookies,
-			String certificatePath) {
+    def registerIOsVariant(String pushAppId, iOSApplicationUploadForm form, Map<String, ?> cookies,
+            String certificatePath) {
 
-		assert root !=null
+        assert root !=null
 
-		JsonBuilder json = new JsonBuilder()
-		def response = RestAssured.given()
-				.contentType("multipart/form-data")
-				.header("Accept", "application/json")
-				.cookies(cookies)
-				.multiPart("certificate", new File(certificatePath))
-				.multiPart("production", form.getProduction().toString())
-				.multiPart("passphrase", form.getPassphrase())
-				.multiPart("name", form.getName())
-				.multiPart("description", form.getDescription())
-				.post("${root}rest/applications/${pushAppId}/iOS")
+        JsonBuilder json = new JsonBuilder()
+        def response = RestAssured.given()
+                .contentType("multipart/form-data")
+                .header("Accept", "application/json")
+                .cookies(cookies)
+                .multiPart("certificate", new File(certificatePath))
+                .multiPart("production", form.getProduction().toString())
+                .multiPart("passphrase", form.getPassphrase())
+                .multiPart("name", form.getName())
+                .multiPart("description", form.getDescription())
+                .post("${root}rest/applications/${pushAppId}/iOS")
 
-		return response
-	}
+        return response
+    }
 
-	def updateIOsVariant(String pushAppId, iOSApplicationUploadForm form, Map<String, ?> cookies,
-			String certificatePath, String variantId) {
+    def updateIOsVariant(String pushAppId, iOSApplicationUploadForm form, Map<String, ?> cookies,
+            String certificatePath, String variantId) {
 
-		assert root !=null
+        assert root !=null
 
-		JsonBuilder json = new JsonBuilder()
-		def response = RestAssured.given()
-				.contentType("multipart/form-data")
-				.header("Accept", "application/json")
-				.cookies(cookies)
-				.multiPart("certificate", new File(certificatePath))
-				.multiPart("production", form.getProduction().toString())
-				.multiPart("passphrase", form.getPassphrase())
-				.multiPart("name", form.getName())
-				.multiPart("description", form.getDescription())
-				.put("${root}rest/applications/${pushAppId}/iOS/" + variantId)
+        JsonBuilder json = new JsonBuilder()
+        def response = RestAssured.given()
+                .contentType("multipart/form-data")
+                .header("Accept", "application/json")
+                .cookies(cookies)
+                .multiPart("certificate", new File(certificatePath))
+                .multiPart("production", form.getProduction().toString())
+                .multiPart("passphrase", form.getPassphrase())
+                .multiPart("name", form.getName())
+                .multiPart("description", form.getDescription())
+                .put("${root}rest/applications/${pushAppId}/iOS/" + variantId)
 
-		return response
-	}
+        return response
+    }
 
-	def updateIOsVariantPatch(String pushAppId, iOSApplicationUploadForm form, Map<String, ?> cookies,
-			String variantId) {
+    def updateIOsVariantPatch(String pushAppId, iOSApplicationUploadForm form, Map<String, ?> cookies,
+            String variantId) {
 
-		assert root !=null
+        assert root !=null
 
-		JsonBuilder json = new JsonBuilder()
-		def response = RestAssured.given()
-				.contentType("application/json")
-				.header("Accept", "application/json")
-				.cookies(cookies)
-				.body( json {
-					production form.getProduction().toString()
-					name form.getName()
-					description form.getDescription()
-					passphrase null
-					certificate null
-				})
-				.patch("${root}rest/applications/${pushAppId}/iOS/" + variantId)
+        JsonBuilder json = new JsonBuilder()
+        def response = RestAssured.given()
+                .contentType("application/json")
+                .header("Accept", "application/json")
+                .cookies(cookies)
+                .body( json {
+                    production form.getProduction().toString()
+                    name form.getName()
+                    description form.getDescription()
+                    passphrase null
+                    certificate null
+                })
+                .patch("${root}rest/applications/${pushAppId}/iOS/" + variantId)
 
-		return response
-	}
+        return response
+    }
 }

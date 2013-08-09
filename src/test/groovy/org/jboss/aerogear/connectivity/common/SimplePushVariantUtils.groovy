@@ -24,33 +24,33 @@ import com.jayway.restassured.RestAssured
 
 class SimplePushVariantUtils {
 
-	def createSimplePushVariant(String name, String description, String variantID, String secret,
-			String developer, String pushNetworkURL) {
-		SimplePushVariant variant = new SimplePushVariant()
-		variant.setName(name)
-		variant.setDescription(description)
-		variant.setVariantID(variantID)
-		variant.setSecret(secret)
-		variant.setDeveloper(developer)
-		variant.setPushNetworkURL(pushNetworkURL)
-		return variant
-	}
+    def createSimplePushVariant(String name, String description, String variantID, String secret,
+            String developer, String pushNetworkURL) {
+        SimplePushVariant variant = new SimplePushVariant()
+        variant.setName(name)
+        variant.setDescription(description)
+        variant.setVariantID(variantID)
+        variant.setSecret(secret)
+        variant.setDeveloper(developer)
+        variant.setPushNetworkURL(pushNetworkURL)
+        return variant
+    }
 
-	def registerSimplePushVariant(String pushAppId, SimplePushVariant variant, Map<String, ?> cookies) {
+    def registerSimplePushVariant(String pushAppId, SimplePushVariant variant, Map<String, ?> cookies) {
 
-		assert root !=null
+        assert root !=null
 
-		JsonBuilder json = new JsonBuilder()
-		def response = RestAssured.given()
-				.contentType("application/json")
-				.header("Accept", "application/json")
-				.cookies(cookies)
-				.body( json {
-					name variant.getName()
-					description variant.getDescription()
-					pushNetworkURL variant.getPushNetworkURL()
-				}).post("${root}rest/applications/${pushAppId}/simplePush")
+        JsonBuilder json = new JsonBuilder()
+        def response = RestAssured.given()
+                .contentType("application/json")
+                .header("Accept", "application/json")
+                .cookies(cookies)
+                .body( json {
+                    name variant.getName()
+                    description variant.getDescription()
+                    pushNetworkURL variant.getPushNetworkURL()
+                }).post("${root}rest/applications/${pushAppId}/simplePush")
 
-		return response
-	}
+        return response
+    }
 }

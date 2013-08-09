@@ -24,33 +24,33 @@ import com.jayway.restassured.RestAssured
 
 class AndroidVariantUtils {
 
-	def createAndroidVariant(String name, String description, String variantID, String secret,
-			String developer, String googleKey) {
-		AndroidVariant variant = new AndroidVariant()
-		variant.setName(name)
-		variant.setDescription(description)
-		variant.setVariantID(variantID)
-		variant.setSecret(secret)
-		variant.setDeveloper(developer)
-		variant.setGoogleKey(googleKey)
-		return variant
-	}
+    def createAndroidVariant(String name, String description, String variantID, String secret,
+            String developer, String googleKey) {
+        AndroidVariant variant = new AndroidVariant()
+        variant.setName(name)
+        variant.setDescription(description)
+        variant.setVariantID(variantID)
+        variant.setSecret(secret)
+        variant.setDeveloper(developer)
+        variant.setGoogleKey(googleKey)
+        return variant
+    }
 
-	def registerAndroidVariant(String pushAppId, AndroidVariant variant, Map<String, ?> cookies) {
+    def registerAndroidVariant(String pushAppId, AndroidVariant variant, Map<String, ?> cookies) {
 
-		assert root !=null
+        assert root !=null
 
-		JsonBuilder json = new JsonBuilder()
-		def response = RestAssured.given()
-				.contentType("application/json")
-				.header("Accept", "application/json")
-				.cookies(cookies)
-				.body( json {
-					googleKey variant.getGoogleKey()
-					name variant.getName()
-					description variant.getDescription()
-				}).post("${root}rest/applications/${pushAppId}/android")
+        JsonBuilder json = new JsonBuilder()
+        def response = RestAssured.given()
+                .contentType("application/json")
+                .header("Accept", "application/json")
+                .cookies(cookies)
+                .body( json {
+                    googleKey variant.getGoogleKey()
+                    name variant.getName()
+                    description variant.getDescription()
+                }).post("${root}rest/applications/${pushAppId}/android")
 
-		return response
-	}
+        return response
+    }
 }

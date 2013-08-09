@@ -9,3 +9,4 @@ target/
 bin/
 *.properties
 aerogear-unified-push-server/*
+/test-classes

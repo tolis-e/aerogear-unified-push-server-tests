@@ -44,53 +44,53 @@ import spock.lang.Specification
 @ArquillianSpecification
 class PushDaoSpecification extends Specification {
 
-	@Deployment
-	def static Archive testArchive() {
-		JavaArchive jar = ShrinkWrap.create(JavaArchive.class)
-				.addClasses(PushApplicationDao.class, PushApplicationDaoImpl.class)
-				.addPackage(PushApplication.class.getPackage())
-				.addPackage(PersistentObject.class.getPackage())
-				.addPackage(Variant.class.getPackage())
-				.addAsManifestResource("META-INF/beans.xml", "beans.xml")
-				.addAsManifestResource("META-INF/persistence-pushee-only.xml", "persistence.xml")
+    @Deployment
+    def static Archive testArchive() {
+        JavaArchive jar = ShrinkWrap.create(JavaArchive.class)
+                .addClasses(PushApplicationDao.class, PushApplicationDaoImpl.class)
+                .addPackage(PushApplication.class.getPackage())
+                .addPackage(PersistentObject.class.getPackage())
+                .addPackage(Variant.class.getPackage())
+                .addAsManifestResource("META-INF/beans.xml", "beans.xml")
+                .addAsManifestResource("META-INF/persistence-pushee-only.xml", "persistence.xml")
 
-		Maven.resolver().resolve("org.ow2.asm:asm:4.1").withoutTransitivity().as(JavaArchive.class).each {
-			jar = jar.merge(it)
-		}
+        Maven.resolver().resolve("org.ow2.asm:asm:4.1").withoutTransitivity().as(JavaArchive.class).each {
+            jar = jar.merge(it)
+        }
 
-		return jar
-	}
+        return jar
+    }
 
-	@Produces
-	@PersistenceContext(unitName = "pushee-default", type = PersistenceContextType.EXTENDED)
-	@Default
-	EntityManager entityManager
+    @Produces
+    @PersistenceContext(unitName = "pushee-default", type = PersistenceContextType.EXTENDED)
+    @Default
+    EntityManager entityManager
 
-	@Inject
-	PushApplicationDao pushAppDao
+    @Inject
+    PushApplicationDao pushAppDao
 
-	def "find all registered apps"() {
-		when: "Check for all registered apps"
-		List<PushApplication> apps = pushAppDao.findAll()
+    def "find all registered apps"() {
+        when: "Check for all registered apps"
+        List<PushApplication> apps = pushAppDao.findAll()
 
-		then: "DAO was injected"
-		pushAppDao!=null
-		and: "No applications were defined"
-		apps.size()==0
-	}
+        then: "DAO was injected"
+        pushAppDao!=null
+        and: "No applications were defined"
+        apps.size()==0
+    }
 
 
-	@UsingDataSet("pushapps.yml")
-	// FIXME if running in default (COMMIT) mode, APE fails to find the transaction to commit
-	@Transactional(value = TransactionMode.DISABLED)
-	def "find an app registered by APE"() {
-		when: "Check for all registered apps"
-		List<PushApplication> apps = pushAppDao.findAll()
+    @UsingDataSet("pushapps.yml")
+    // FIXME if running in default (COMMIT) mode, APE fails to find the transaction to commit
+    @Transactional(value = TransactionMode.DISABLED)
+    def "find an app registered by APE"() {
+        when: "Check for all registered apps"
+        List<PushApplication> apps = pushAppDao.findAll()
 
-		then: "DAO was injected"
-		pushAppDao!=null
-		and: "One application was defined"
-		apps.size() == 1
-	}
+        then: "DAO was injected"
+        pushAppDao!=null
+        and: "One application was defined"
+        apps.size() == 1
+    }
 
 }

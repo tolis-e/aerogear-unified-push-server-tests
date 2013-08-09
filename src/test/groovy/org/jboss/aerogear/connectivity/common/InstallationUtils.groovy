@@ -24,36 +24,36 @@ import com.jayway.restassured.RestAssured
 
 class InstallationUtils {
 
-	def createInstallation(String deviceToken, String deviceType,
-			String OperatingSystem, String osVersion, String alias, String category) {
-		InstallationImpl installation = new InstallationImpl()
-		installation.setDeviceToken(deviceToken)
-		installation.setDeviceType(deviceType)
-		installation.setOperatingSystem(OperatingSystem)
-		installation.setOsVersion(osVersion)
-		installation.setAlias(alias)
-		installation.setCategory(category)
-		return installation
-	}
+    def createInstallation(String deviceToken, String deviceType,
+            String OperatingSystem, String osVersion, String alias, String category) {
+        InstallationImpl installation = new InstallationImpl()
+        installation.setDeviceToken(deviceToken)
+        installation.setDeviceType(deviceType)
+        installation.setOperatingSystem(OperatingSystem)
+        installation.setOsVersion(osVersion)
+        installation.setAlias(alias)
+        installation.setCategory(category)
+        return installation
+    }
 
-	def registerInstallation(String variantID, String secret, InstallationImpl installation) {
+    def registerInstallation(String variantID, String secret, InstallationImpl installation) {
 
-		assert root !=null
+        assert root !=null
 
-		JsonBuilder json = new JsonBuilder()
-		def response = RestAssured.given()
-				.contentType("application/json")
-				.auth().basic(variantID, secret)
-				.header("Accept", "application/json")
-				.body( json {
-					deviceToken installation.getDeviceToken()
-					deviceType installation.getDeviceType()
-					operatingSystem installation.getOperatingSystem()
-					osVersion installation.getOsVersion()
-					alias installation.getAlias()
-					category installation.getCategory()
-				}).post("${root}rest/registry/device")
+        JsonBuilder json = new JsonBuilder()
+        def response = RestAssured.given()
+                .contentType("application/json")
+                .auth().basic(variantID, secret)
+                .header("Accept", "application/json")
+                .body( json {
+                    deviceToken installation.getDeviceToken()
+                    deviceType installation.getDeviceType()
+                    operatingSystem installation.getOperatingSystem()
+                    osVersion installation.getOsVersion()
+                    alias installation.getAlias()
+                    category installation.getCategory()
+                }).post("${root}rest/registry/device")
 
-		return response
-	}
+        return response
+    }
 }

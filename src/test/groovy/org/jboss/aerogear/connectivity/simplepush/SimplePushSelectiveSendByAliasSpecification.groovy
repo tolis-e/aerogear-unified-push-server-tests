@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AndroidVariantUtils
 import org.jboss.aerogear.connectivity.common.AuthenticationUtils
-import org.jboss.aerogear.connectivity.common.Deployments;
+import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.aerogear.connectivity.common.InstallationUtils
 import org.jboss.aerogear.connectivity.common.PushApplicationUtils
 import org.jboss.aerogear.connectivity.common.PushNotificationSenderUtils
@@ -410,7 +410,7 @@ class SimplePushSelectiveSendByAliasSpecification extends Specification {
                         return serverInput != null && serverInput.contains(SIMPLE_PUSH_VERSION)
                     }
                 }
-		)
+                )
 
         and: "The message should have been sent"
         serverInput != null && serverInput.contains(SIMPLE_PUSH_VERSION)
@@ -420,25 +420,25 @@ class SimplePushSelectiveSendByAliasSpecification extends Specification {
     }
 
     private ServerSocket createSocket() {
-        return new ServerSocket(8081, 0, InetAddress.getByName("localhost"));
+        return new ServerSocket(8081, 0, InetAddress.getByName("localhost"))
     }
 
     private String connectAndRead(ServerSocket providerSocket) {
 
-        Socket connection = null;
-        BufferedReader input = null;
-        StringBuffer response = new StringBuffer();
+        Socket connection = null
+        BufferedReader input = null
+        StringBuffer response = new StringBuffer()
         try{
-            connection = providerSocket.accept();
-            connection.setSoTimeout(2000);
-            input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            connection = providerSocket.accept()
+            connection.setSoTimeout(2000)
+            input = new BufferedReader(new InputStreamReader(connection.getInputStream()))
 
-            int result;
+            int result
             while ((result = input.read()) != -1) {
-                response.append(Character.toChars(result));
+                response.append(Character.toChars(result))
 
                 if (response.toString().contains(NOTIFICATION_ALERT_MSG)) {
-                    break;
+                    break
                 }
             }
         }
@@ -456,9 +456,9 @@ class SimplePushSelectiveSendByAliasSpecification extends Specification {
                 providerSocket.close()
             }
             catch(Exception e){
-                e.printStackTrace();
+                e.printStackTrace()
             }
         }
-        return response.toString();
+        return response.toString()
     }
 }
