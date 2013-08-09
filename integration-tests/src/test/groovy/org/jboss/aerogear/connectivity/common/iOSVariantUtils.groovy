@@ -78,8 +78,8 @@ class iOSVariantUtils {
 		return response
 	}
 
-	def updateIOsVariantPatch(String pushAppId, iOSApplicationUploadForm form, Map<String, ?> cookies, 
-		String variantId) {
+	def updateIOsVariantPatch(String pushAppId, iOSApplicationUploadForm form, Map<String, ?> cookies,
+			String variantId) {
 
 		assert root !=null
 

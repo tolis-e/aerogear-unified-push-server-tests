@@ -22,7 +22,7 @@ import javax.inject.Inject
 import javax.ws.rs.core.Response.Status
 
 import org.jboss.aerogear.connectivity.common.AuthenticationUtils
-import org.jboss.aerogear.connectivity.common.Deployments;
+import org.jboss.aerogear.connectivity.common.Deployments
 import org.jboss.aerogear.connectivity.common.InstallationUtils
 import org.jboss.aerogear.connectivity.common.PushApplicationUtils
 import org.jboss.aerogear.connectivity.common.PushNotificationSenderUtils
@@ -62,47 +62,43 @@ import com.notnoop.exceptions.NetworkIOException
 	PushNotificationSenderUtils,iOSVariantUtils])
 class IosRegistrationSpecification extends Specification {
 
-	private final static String AUTHORIZED_LOGIN_NAME = "admin"
+	def private final static String PUSH_APPLICATION_NAME = "TestPushApplication__1"
 
-	private final static String AUTHORIZED_PASSWORD = "123"
+	def private final static String PUSH_APPLICATION_DESC = "awesome app__1"
 
-	private final static String PUSH_APPLICATION_NAME = "TestPushApplication__1"
+	def private final static String NOTIFICATION_ALERT_MSG = "Hello AeroGearers"
 
-	private final static String PUSH_APPLICATION_DESC = "awesome app__1"
+	def private final static String NOTIFICATION_SOUND = "default"
 
-	private final static String NOTIFICATION_ALERT_MSG = "Hello AeroGearers"
+	def private final static int NOTIFICATION_BADGE = 7
 
-	private final static String NOTIFICATION_SOUND = "default"
+	def private final static String IOS_VARIANT_NAME = "IOS_Variant__1"
 
-	private final static int NOTIFICATION_BADGE = 7
+	def private final static String UPDATED_IOS_VARIANT_NAME = "IOS_Variant__2"
 
-	private final static String IOS_VARIANT_NAME = "IOS_Variant__1"
+	def private final static String IOS_VARIANT_DESC = "awesome variant__1"
 
-	private final static String UPDATED_IOS_VARIANT_NAME = "IOS_Variant__2"
+	def private final static String UPDATED_IOS_VARIANT_DESC = "awesome variant__2"
 
-	private final static String IOS_VARIANT_DESC = "awesome variant__1"
+	def private final static String IOS_DEVICE_TOKEN = "abcd123456"
 
-	private final static String UPDATED_IOS_VARIANT_DESC = "awesome variant__2"
+	def private final static String IOS_DEVICE_TOKEN_2 = "abcd456789"
 
-	private final static String IOS_DEVICE_TOKEN = "abcd123456"
+	def private final static String IOS_DEVICE_OS = "IOS"
 
-	private final static String IOS_DEVICE_TOKEN_2 = "abcd456789"
+	def private final static String IOS_DEVICE_TYPE = "IOSTablet"
 
-	private final static String IOS_DEVICE_OS = "IOS"
+	def private final static String IOS_DEVICE_OS_VERSION = "6"
 
-	private final static String IOS_DEVICE_TYPE = "IOSTablet"
+	def private final static String IOS_CLIENT_ALIAS = "qa_iOS_1@aerogear"
 
-	private final static String IOS_DEVICE_OS_VERSION = "6"
+	def private final static String COMMON_IOS_ANDROID_CLIENT_ALIAS = "qa_ios_android@aerogear"
 
-	private final static String IOS_CLIENT_ALIAS = "qa_iOS_1@aerogear"
+	def private final static String IOS_CERTIFICATE_PATH = "src/test/resources/certs/qaAerogear.p12"
 
-	private final static String COMMON_IOS_ANDROID_CLIENT_ALIAS = "qa_ios_android@aerogear"
+	def private final static String IOS_CERTIFICATE_PASS_PHRASE = "aerogear"
 
-	private final static String IOS_CERTIFICATE_PATH = "src/test/resources/certs/qaAerogear.p12"
-
-	private final static String IOS_CERTIFICATE_PASS_PHRASE = "aerogear"
-
-	private final static URL root = new URL("http://localhost:8080/ag-push/")
+	def private final static URL root = new URL("http://localhost:8080/ag-push/")
 
 	@Deployment(testable=true)
 	def static WebArchive "create deployment"() {
@@ -131,7 +127,7 @@ class IosRegistrationSpecification extends Specification {
 	@RunAsClient
 	def "Authenticate"() {
 		when:
-		authCookies = login(AUTHORIZED_LOGIN_NAME, AUTHORIZED_PASSWORD).getCookies()
+		authCookies = adminLogin().getCookies()
 
 		then:
 		authCookies != null
@@ -172,7 +168,7 @@ class IosRegistrationSpecification extends Specification {
 		def response = registerIOsVariant(pushApplicationId, (iOSApplicationUploadForm)form, new HashMap<String, ?>(),
 				IOS_CERTIFICATE_PATH)
 
-		then: "Push Application id is not empty"
+		then: "Push Application id is not null"
 		pushApplicationId != null
 
 		and: "Response status code is 401"
@@ -192,7 +188,7 @@ class IosRegistrationSpecification extends Specification {
 		iOSVariantId = body.get("variantID")
 		iOSPushSecret = body.get("secret")
 
-		then: "Push Application id is not empty"
+		then: "Push Application id is not null"
 		pushApplicationId != null
 
 		and: "Response status code is 201"
@@ -201,7 +197,7 @@ class IosRegistrationSpecification extends Specification {
 		and: "iOS Variant id is not null"
 		iOSVariantId != null
 
-		and: "iOS Secret is not empty"
+		and: "iOS Secret is not null"
 		iOSPushSecret != null
 	}
 
@@ -215,7 +211,7 @@ class IosRegistrationSpecification extends Specification {
 		def response = updateIOsVariantPatch(pushApplicationId, (iOSApplicationUploadForm)form, authCookies,
 				iOSVariantId)
 
-		then: "Push Application id and iOSVariantId are not empty"
+		then: "Push Application id and iOSVariantId are not null"
 		pushApplicationId != null && iOSVariantId != null
 
 		and: "Response status code is 204"
@@ -254,7 +250,7 @@ class IosRegistrationSpecification extends Specification {
 		def response = updateIOsVariant(pushApplicationId, (iOSApplicationUploadForm)form, authCookies,
 				IOS_CERTIFICATE_PATH, iOSVariantId)
 
-		then: "Push Application id and iOSVariantId are not empty"
+		then: "Push Application id and iOSVariantId are not null"
 		pushApplicationId != null && iOSVariantId != null
 
 		and: "Response status code is 204"
@@ -293,7 +289,7 @@ class IosRegistrationSpecification extends Specification {
 		when: "Installation is registered"
 		def response = registerInstallation(iOSVariantId, iOSPushSecret, iOSInstallation)
 
-		then: "Variant id and secret is not empty"
+		then: "Variant id and secret is not null"
 		iOSVariantId != null && iOSPushSecret != null
 
 		and: "Response status code is 200"
@@ -310,7 +306,7 @@ class IosRegistrationSpecification extends Specification {
 		when: "Installation is registered"
 		def response = registerInstallation(iOSVariantId, iOSPushSecret, iOSInstallation)
 
-		then: "Variant id and secret is not empty"
+		then: "Variant id and secret is not null"
 		iOSVariantId != null && iOSPushSecret != null
 
 		and: "Response status code is 200"
@@ -320,7 +316,7 @@ class IosRegistrationSpecification extends Specification {
 	def "Verify that registrations were done"() {
 
 		when: "Getting all the Push Applications for the user"
-		def List<PushApplication> pushApps = pushAppService.findAllPushApplicationsForDeveloper(AUTHORIZED_LOGIN_NAME)
+		def List<PushApplication> pushApps = pushAppService.findAllPushApplicationsForDeveloper(AuthenticationUtils.ADMIN_LOGIN_NAME)
 
 		and: "Getting the iOS variants"
 		def List<iOSVariant> iOSVariants = iosVariantService.findAlliOSVariants()
