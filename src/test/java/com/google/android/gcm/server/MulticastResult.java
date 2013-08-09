@@ -19,19 +19,18 @@ import java.util.List;
 
 /**
  * 
- * This class mocks the original com.google.android.gcm.server.MulticastResult class and
- * is used for testing reasons.
+ * This class mocks the original com.google.android.gcm.server.MulticastResult class and is used for testing reasons.
  * 
  */
 public class MulticastResult {
 
-	private List<Result> results;
+    private List<Result> results;
 
-	public List<Result> getResults() {
-		return results;
-	}
+    public List<Result> getResults() {
+        return results;
+    }
 
-	public void setResults(List<Result> results) {
-		this.results = results;
-	}
+    public void setResults(List<Result> results) {
+        this.results = results;
+    }
 }
