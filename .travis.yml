@@ -1,14 +1,9 @@
 language: java
 jdk:
-  - openjdk7
-  - oraclejdk7
-  - openjdk6
-  - oraclejdk6
-#  NOTE: before install is likely not needed as travis fetches submodules ootb
+ - openjdk7
 before_install:
-  - git submodule update --init --recursive
-  - git submodule foreach "git pull origin master && git checkout master"
-#  install phase is skipped, as we don't need it and it saves time
+ - jboss-conf/setup.sh
+ - export JBOSS_HOME=`pwd`/jboss-conf/jboss-as-7.1.1.Final
 install: true
 script:
-  - mvn test
+ - mvn test

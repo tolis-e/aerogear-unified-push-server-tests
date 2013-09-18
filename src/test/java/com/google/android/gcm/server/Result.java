@@ -17,18 +17,19 @@ package com.google.android.gcm.server;
 
 /**
  * 
- * This class mocks the original com.google.android.gcm.server.Result class and is used for testing reasons.
+ * This class mocks the original com.google.android.gcm.server.Result class and
+ * is used for testing reasons.
  * 
  */
 public class Result {
 
-    private String errorCode;
+	private String errorCode;
 
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
 
-    public String getErrorCodeName() {
-        return errorCode;
-    }
+	public String getErrorCodeName() {
+		return errorCode;
+	}
 }

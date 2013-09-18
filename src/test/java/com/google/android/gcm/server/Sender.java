@@ -32,14 +32,14 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class Sender {
 
-    public static List<String> gcmRegIdsList = null;
+    private static List<String> gcmRegIdsList = null;
 
-    public static Message gcmMessage = null;
+    private static Message gcmMessage = null;
 
     private String key;
 
     public Sender(String key) {
-        this.setKey(key);
+        this.key = key;
     }
 
     public Sender() {
@@ -84,8 +84,12 @@ public class Sender {
         return key;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public static List<String> getGcmRegIdsList() {
+        return gcmRegIdsList;
+    }
+
+    public static Message getGcmMessage() {
+        return gcmMessage;
     }
 
     public static void clear() {

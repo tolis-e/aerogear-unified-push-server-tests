@@ -46,26 +46,17 @@ import com.notnoop.apns.ApnsService;
 public class ApnsServiceImpl implements ApnsService {
 
     public ApnsServiceImpl() {
-
     }
 
-    public static Collection<String> tokensList = null;
+    private static Collection<String> tokensList = null;
 
-    public static String alert = null;
+    private static String alert = null;
 
-    public static String sound = null;
+    private static String sound = null;
 
-    public static int badge = -1;
+    private static int badge = -1;
 
-    public void start() {
-    }
-
-    public void stop() {
-    }
-
-    public void testConnection() {
-
-    }
+    private static String customFields;
 
     public Map<String, Date> getInactiveDevices() {
         final HashMap<String, Date> inactiveTokensHM = new HashMap<String, Date>();
@@ -93,17 +84,50 @@ public class ApnsServiceImpl implements ApnsService {
                     alert = subparts[1];
                 else if ("sound".equals(subparts[0]))
                     sound = subparts[1];
-                else
+                else if ("badge".equals(subparts[0]))
                     badge = subparts[1] != null ? Integer.parseInt(subparts[1]) : -1;
+                else if ("customFields".equals(subparts[0]))
+                    customFields = subparts[1];
             }
         }
         return null;
     }
 
+    public void start() {
+    }
+
+    public void stop() {
+    }
+
+    public void testConnection() {
+
+    }
+
+    public static Collection<String> getTokensList() {
+        return tokensList;
+    }
+
+    public static String getAlert() {
+        return alert;
+    }
+
+    public static String getSound() {
+        return sound;
+    }
+
+    public static int getBadge() {
+        return badge;
+    }
+
+    public static String getCustomFields() {
+        return customFields;
+    }
+
     public static void clear() {
         tokensList = null;
-        alert = null;
         sound = null;
         badge = -1;
+        alert = null;
+        customFields = null;
     }
 }
