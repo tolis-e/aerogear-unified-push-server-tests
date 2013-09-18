@@ -4,6 +4,16 @@ BASE_DIR=`pwd`/$(dirname $0)
 DOWNLOAD_URL="http://download.jboss.org/jbossas/7.1/jboss-as-7.1.1.Final/jboss-as-7.1.1.Final.zip"
 JBOSS_ZIP="$BASE_DIR/jboss-as-7.1.1.Final.zip"
 JBOSS_HOME="$BASE_DIR/jboss-as-7.1.1.Final"
+BASE_REPO_DIR="$BASE_DIR/.."
+AG_UPS_REPO="$BASE_REPO_DIR/aerogear-unifiedpush-server"
+
+if [ -d "$AG_UPS_REPO" ]; then
+    rm -rf $AG_UPS_REPO/
+fi
+
+if [ ! -d "$AG_UPS_REPO" ]; then
+    git clone https://github.com/aerogear/aerogear-unifiedpush-server.git
+fi
 
 if [ -d "$JBOSS_HOME" ]; then
     rm -rf $JBOSS_HOME/
